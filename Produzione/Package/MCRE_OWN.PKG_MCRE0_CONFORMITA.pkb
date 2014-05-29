@@ -1,0 +1,93 @@
+CREATE OR REPLACE PACKAGE BODY MCRE_OWN.PKG_MCRE0_CONFORMITA AS
+
+    FUNCTION FND_MCRE0_verifica_conformita(p_rec IN f_slave_par_type) RETURN BOOLEAN IS
+
+        c_nome CONSTANT VARCHAR2(50) := c_package || '.verifica_conformita';
+
+        v_count NUMBER;
+        v_periodo NUMBER;
+
+    BEGIN
+
+         v_periodo := TO_NUMBER(TO_CHAR(p_rec.PERIODO, 'YYYYMMDD'));
+
+
+        DBMS_OUTPUT.PUT_LINE('BEGIN FND_MCRE0_verifica_conformita ');
+
+        EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' || p_rec.TAB_EXT INTO v_count;
+
+        PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,c_nome,'OK');
+
+        DBMS_OUTPUT.PUT_LINE('FND_MCRE0_verifica_conformita ESEGUITA');
+
+        BEGIN
+
+        EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' || p_rec.TAB_EXT || '_BAD' INTO v_count;
+
+            IF v_count > 0 THEN
+
+            UPDATE T_MCRE0_WRK_ACQUISIZIONE
+            SET SCARTI_EXTERNAL = v_count
+            where ID_FLUSSO = p_rec.SEQ_FLUSSO;
+            COMMIT;
+            PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,'EXTERNAL TABLE CON SCARTI','OK');
+
+
+--            EXECUTE IMMEDIATE 'INSERT INTO T_MCRE0_WRK_EXTERNAL_BAD SELECT ' || p_rec.SEQ_FLUSSO || ',' ||  V_PERIODO || ', BAD FROM '|| p_rec.TAB_EXT || '_BAD';
+--            COMMIT;
+--            PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,'SAVE BAD EXTERNAL TABLE','OK');
+
+
+--            EXECUTE IMMEDIATE 'INSERT INTO T_MCRE0_WRK_EXTERNAL_LOG SELECT '|| p_rec.SEQ_FLUSSO || ',' ||  V_PERIODO || ', LOG FROM '|| p_rec.TAB_EXT || '_LOG';
+--            COMMIT;
+--            PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,'SAVE LOG EXTERNAL TABLE','OK');
+
+            END IF;
+
+
+
+
+        EXCEPTION WHEN OTHERS THEN
+
+        UPDATE T_MCRE0_WRK_ACQUISIZIONE
+        SET SCARTI_EXTERNAL = 0
+        where ID_FLUSSO = p_rec.SEQ_FLUSSO;
+        COMMIT;
+        PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,'EXTERNAL TABLE SENZA SCARTI','OK');
+
+
+
+--        EXECUTE IMMEDIATE 'INSERT INTO T_MCRE0_WRK_EXTERNAL_LOG SELECT '|| p_rec.SEQ_FLUSSO || ',' ||  V_PERIODO || ', LOG FROM '|| p_rec.TAB_EXT || '_LOG';
+--        COMMIT;
+--        PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,'SAVE LOG EXTERNAL TABLE','OK');
+
+
+        RETURN TRUE;
+
+        END;
+
+        RETURN TRUE;
+
+
+    EXCEPTION
+
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('ERRORE IN FND_MCRE0_verifica_conformita');
+            PKG_MCRE0_LOG.SPO_MCRE0_LOG_EVENTO(p_rec.SEQ_FLUSSO,c_nome,'ERRORE',SUBSTR(SQLERRM, 1, 255));
+
+            RETURN FALSE;
+
+    END FND_MCRE0_verifica_conformita;
+
+END PKG_MCRE0_CONFORMITA;
+/
+
+
+CREATE SYNONYM MCRE_APP.PKG_MCRE0_CONFORMITA FOR MCRE_OWN.PKG_MCRE0_CONFORMITA;
+
+
+CREATE SYNONYM MCRE_USR.PKG_MCRE0_CONFORMITA FOR MCRE_OWN.PKG_MCRE0_CONFORMITA;
+
+
+GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRE0_CONFORMITA TO MCRE_USR;
+

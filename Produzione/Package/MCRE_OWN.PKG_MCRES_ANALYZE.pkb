@@ -1,0 +1,313 @@
+CREATE OR REPLACE PACKAGE BODY MCRE_OWN.PKG_MCRES_ANALYZE
+AS
+
+/******************************************************************************
+ NAME:       PKG_MCRES_GESTIONE_PARTIZIONI
+ PURPOSE:
+
+ REVISIONS:
+ Ver        Date        Author             Description
+ ---------  ----------      -----------------  ------------------------------------
+ 1.0     05/07/2011   V.Galli         Created this package.
+******************************************************************************/
+
+   CURSOR c_params (p_table IN VARCHAR2)
+   IS
+      SELECT
+            BLOCK_SAMPLE ,
+            CASCADE    ,
+            DEGREE    ,
+            ESTIMATE_PERCENT    ,
+            GRANULARITY    ,
+            METHOD_OPTION,
+            TABLE_OWNER,
+            TIPO_PARTIZIONE
+       FROM T_MCRES_WRK_STATISTICHE
+       WHERE TABLE_NAME = p_table;
+
+  FUNCTION FNC_ANALIZZA_PARTIZIONE(P_REC IN F_SLAVE_PAR_TYPE) RETURN NUMBER
+  IS
+    V_SUFFIX_PARTITION T_MCRES_WRK_CONFIGURAZIONE.VALORE_COSTANTE%TYPE;
+    V_BLOCK_SAMPLE BOOLEAN:=FALSE;
+    V_cascade BOOLEAN:=FALSE;
+    V_ESISTE NUMBER:=0;
+    V_COD_ABI T_MCRES_WRK_ACQUISIZIONE.COD_ABI%TYPE;
+    V_TBL T_MCRES_WRK_ELABORAZIONE.TAB_SRC%TYPE;
+    V_PARTITION varchar2(30);
+    V_ESISTE_PART NUMBER(1);
+    V_ESITO number(1):=ko;
+  BEGIN
+
+    BEGIN
+      SELECT  A.COD_ABI,  E.TAB_SRC
+      INTO V_COD_ABI,  V_TBL
+      FROM T_MCRES_WRK_ACQUISIZIONE A,
+             T_MCRES_WRK_ELABORAZIONE E
+      WHERE A.ID_FLUSSO = P_REC.SEQ_FLUSSO
+      AND A.COD_FLUSSO = E.COD_FLUSSO
+      AND E.ORDINE_ALIMENTAZIONE = P_REC.ORDINE_ALIMENTAZIONE;
+
+    EXCEPTION
+      WHEN OTHERS THEN
+        PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_analizza_partizione',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'COD_ABI='||V_COD_ABI);
+    end;
+
+    V_SUFFIX_PARTITION := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_GET_SUFFIX_PARTITION(P_REC.SEQ_FLUSSO);
+    FOR REC_PARAMS IN C_PARAMS(V_TBL) LOOP
+      IF(REC_PARAMS.TIPO_PARTIZIONE='ABI') THEN V_PARTITION:=V_COD_ABI;
+      ELSIF(REC_PARAMS.TIPO_PARTIZIONE='ID_DPER') THEN V_PARTITION:=TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||'_'||V_COD_ABI;
+      ELSE V_PARTITION:='ATTIVE_'||V_COD_ABI;
+      END IF;
+
+      if(REC_PARAMS.GRANULARITY='SUBPARTITION')then
+        V_ESISTE_PART := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_ESISTE_SOTTOPARTIZIONE(V_TBL,V_SUFFIX_PARTITION||V_PARTITION,P_REC.SEQ_FLUSSO);
+      else
+        V_ESISTE_PART := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_ESISTE_PARTIZIONE(V_TBL,V_SUFFIX_PARTITION||V_PARTITION,P_REC.SEQ_FLUSSO);
+      end if;
+      IF V_ESISTE_PART=1 THEN
+        BEGIN
+          v_esiste := 1;
+          IF(REC_PARAMS.BLOCK_SAMPLE=0)THEN V_BLOCK_SAMPLE:=FALSE; ELSE V_BLOCK_SAMPLE:=TRUE; END IF;
+          IF(REC_PARAMS.CASCADE=0)THEN V_CASCADE:=FALSE; ELSE V_CASCADE:=TRUE; END IF;
+          DBMS_STATS.GATHER_TABLE_STATS (
+                OWNNAME           => REC_PARAMS.TABLE_OWNER,
+                TABNAME              => V_TBL,
+                PARTNAME           => V_SUFFIX_PARTITION||V_PARTITION,
+                ESTIMATE_PERCENT =>  REC_PARAMS.ESTIMATE_PERCENT,
+                BLOCK_SAMPLE      => V_BLOCK_SAMPLE,
+                METHOD_OPT        =>  REC_PARAMS.METHOD_OPTION,
+                GRANULARITY        =>  REC_PARAMS.GRANULARITY,
+                CASCADE            => V_cascade
+              );
+        END;
+      END IF;
+      IF(V_PARTITION='ATTIVE_'||V_COD_ABI)THEN
+        V_PARTITION:='STORICHE_'||V_COD_ABI;
+        IF PKG_MCRES_GESTIONE_PARTIZIONI.FNC_ESISTE_sottoPARTIZIONE(V_TBL,V_SUFFIX_PARTITION||V_PARTITION,P_REC.SEQ_FLUSSO)=1 THEN
+          BEGIN
+            DBMS_STATS.GATHER_TABLE_STATS (
+                  OWNNAME           => REC_PARAMS.TABLE_OWNER,
+                  TABNAME              => v_tbl,
+                  PARTNAME           => V_SUFFIX_PARTITION||V_PARTITION,
+                  ESTIMATE_PERCENT =>  REC_PARAMS.ESTIMATE_PERCENT,
+                  BLOCK_SAMPLE      => V_BLOCK_SAMPLE,
+                  METHOD_OPT        =>  REC_PARAMS.METHOD_OPTION,
+                  GRANULARITY        =>  REC_PARAMS.GRANULARITY,
+                  CASCADE            => V_cascade
+                );
+          END;
+        END IF;
+      END IF;
+    END LOOP;
+    IF(V_ESISTE=0)THEN
+      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO, C_PACKAGE||'.fnc_analizza_partizione', PKG_MCRES_AUDIT.C_WARNING, SQLCODE,SQLERRM,'TABELLA NON CENSITA IN T_MCRES_WRK_STATISTICHE - TAB='||v_tbl||' - PART='||V_SUFFIX_PARTITION||V_PARTITION);
+    end if;
+
+    V_ESITO := FNC_REBUILD_INDEXES(P_REC);
+
+    return ok;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO, C_PACKAGE||'.fnc_analizza_partizione', PKG_MCRES_AUDIT.C_ERROR, sqlcode,SQLERRM,'GENERALE - TAB='||v_tbl||' - PART='||V_SUFFIX_PARTITION||V_COD_ABI);
+      return ko;
+  END FNC_ANALIZZA_PARTIZIONE;
+
+  FUNCTION FNC_ANALIZZA_TABELLA(P_REC IN F_SLAVE_PAR_TYPE) return number
+  IS
+    V_BLOCK_SAMPLE BOOLEAN:=FALSE;
+    V_cascade BOOLEAN:=FALSE;
+    V_ESISTE NUMBER:=0;
+    V_COD_ABI T_MCRES_WRK_ACQUISIZIONE.COD_ABI%TYPE;
+    v_tbl T_MCRES_WRK_ELABORAZIONE.TAB_SRC%type;
+  BEGIN
+
+    BEGIN
+      SELECT COD_ABI,E.TAB_SRC
+      INTO V_COD_ABI,v_tbl
+      FROM T_MCRES_WRK_ACQUISIZIONE A,
+             T_MCRES_WRK_ELABORAZIONE E
+      WHERE A.ID_FLUSSO = P_REC.SEQ_FLUSSO
+      AND A.COD_FLUSSO = E.COD_FLUSSO
+      AND E.ORDINE_ALIMENTAZIONE = P_REC.ORDINE_ALIMENTAZIONE;
+    EXCEPTION
+      WHEN OTHERS THEN
+        PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_analizza_partizione',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'COD_ABI='||V_COD_ABI);
+    end;
+
+    FOR REC_PARAMS IN C_PARAMS(v_tbl) LOOP
+      v_esiste:=1;
+      BEGIN
+        IF(REC_PARAMS.BLOCK_SAMPLE=0)THEN V_BLOCK_SAMPLE:=FALSE; ELSE V_BLOCK_SAMPLE:=TRUE; END IF;
+        if(REC_PARAMS.cascade=0)then V_cascade:=false; else V_cascade:=true; end if;
+        DBMS_STATS.GATHER_TABLE_STATS (OWNNAME           => REC_PARAMS.TABLE_OWNER,
+                                   TABNAME               => v_tbl,
+                                   PARTNAME              => null,
+                                   ESTIMATE_PERCENT      =>  REC_PARAMS.ESTIMATE_PERCENT,
+                                   BLOCK_SAMPLE          => V_BLOCK_SAMPLE,
+                                   METHOD_OPT            =>  REC_PARAMS.METHOD_OPTION,
+                                   GRANULARITY           =>  'GLOBAL',
+                                   CASCADE               => V_cascade
+                                  );
+      END;
+    END LOOP;
+
+    IF(V_ESISTE=0)THEN
+      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO, C_PACKAGE||'.fnc_analizza_tabella', PKG_MCRES_AUDIT.C_WARNING, SQLCODE,SQLERRM,'TABELLA NON CENSITA - TAB='||v_tbl);
+    end if;
+
+    return ok;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_analizza_tabella',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'GENERALE - TAB='||v_tbl);
+      RETURN KO;
+  end FNC_ANALIZZA_TABELLA;
+
+  FUNCTION FNC_ANALIZZA_PART_E_TABELLA (P_REC IN F_SLAVE_PAR_TYPE)RETURN NUMBER IS
+      v_esito            number;
+      V_COD_ABI T_MCRES_WRK_ACQUISIZIONE.COD_ABI%TYPE;
+      v_tbl T_MCRES_WRK_ELABORAZIONE.TAB_SRC%type;
+   BEGIN
+
+      BEGIN
+        SELECT A.COD_ABI, E.TAB_SRC
+        INTO V_COD_ABI, v_tbl
+        FROM T_MCRES_WRK_ACQUISIZIONE A,
+               T_MCRES_WRK_ELABORAZIONE E
+        WHERE A.ID_FLUSSO = P_REC.SEQ_FLUSSO
+        AND A.COD_FLUSSO = E.COD_FLUSSO
+        AND E.ORDINE_ALIMENTAZIONE = P_REC.ORDINE_ALIMENTAZIONE;
+      EXCEPTION
+        WHEN OTHERS THEN
+          PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_analizza_partizione',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'COD_ABI='||V_COD_ABI);
+      end;
+
+      V_ESITO := FNC_ANALIZZA_PARTIZIONE(P_REC);
+      IF(V_ESITO=OK)THEN
+        V_ESITO := FNC_ANALIZZA_TABELLA(P_REC);
+      end if;
+
+      RETURN V_ESITO;
+
+   EXCEPTION
+      WHEN OTHERS THEN
+         PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_analizza_part_e_tabella',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'GENERALE - TAB='||v_tbl||' PART='||V_COD_ABI);
+         RETURN ko;
+   END;
+
+   FUNCTION FNC_REBUILD_INDEXES(P_REC IN F_SLAVE_PAR_TYPE)
+   RETURN NUMBER
+   IS
+
+      V_COD_ABI T_MCRES_WRK_ACQUISIZIONE.COD_ABI%TYPE;
+      V_TBL T_MCRES_WRK_ELABORAZIONE.TAB_SRC%TYPE;
+      V_PARTITION VARCHAR2(30);
+      V_ESISTE_PART NUMBER(1);
+
+      V_NOTE VARCHAR2(200);
+      V_ESISTE NUMBER(1):=0;
+      V_SUFFIX_PARTITION T_MCRES_WRK_CONFIGURAZIONE.VALORE_COSTANTE%TYPE;
+
+      CURSOR cur_P(P_TABLE varchar2) IS
+        SELECT 'ALTER INDEX ' || INDEX_NAME || ' REBUILD PARTITION ' COMMAND
+        FROM ALL_INDEXES I
+        WHERE I.OWNER = 'MCRE_OWN'
+        AND I.TABLE_NAME = P_TABLE;
+
+     CURSOR cur_sP(P_TABLE varchar2) IS
+        SELECT 'ALTER INDEX ' || INDEX_NAME || ' REBUILD SUBPARTITION ' COMMAND
+        FROM ALL_INDEXES I
+        WHERE I.OWNER = 'MCRE_OWN'
+        AND I.TABLE_NAME = P_TABLE;
+  BEGIN
+
+      BEGIN
+        SELECT  A.COD_ABI,  E.TAB_SRC
+        INTO V_COD_ABI,  V_TBL
+        FROM T_MCRES_WRK_ACQUISIZIONE A,
+               T_MCRES_WRK_ELABORAZIONE E
+        WHERE A.ID_FLUSSO = P_REC.SEQ_FLUSSO
+        AND A.COD_FLUSSO = E.COD_FLUSSO
+        AND E.ORDINE_ALIMENTAZIONE = P_REC.ORDINE_ALIMENTAZIONE;
+      EXCEPTION
+        WHEN OTHERS THEN
+          PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_PACKAGE||'.fnc_rebuild_indexes',PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,'COD_ABI='||V_COD_ABI);
+      end;
+
+      V_NOTE := 'GET Suffisso';
+      V_SUFFIX_PARTITION := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_GET_SUFFIX_PARTITION(P_REC.SEQ_FLUSSO);
+
+      V_NOTE := 'GET nome partizione';
+      FOR REC_PARAMS IN C_PARAMS(V_TBL) LOOP
+        IF(REC_PARAMS.TIPO_PARTIZIONE='ABI') THEN V_PARTITION:=V_SUFFIX_PARTITION||V_COD_ABI;
+        ELSIF(REC_PARAMS.TIPO_PARTIZIONE='ID_DPER') THEN V_PARTITION:=V_SUFFIX_PARTITION||TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||'_'||V_COD_ABI;
+        ELSE V_PARTITION:=V_SUFFIX_PARTITION||'ATTIVE_'||V_COD_ABI;
+        END IF;
+
+        IF(REC_PARAMS.TIPO_PARTIZIONE='ABI') THEN
+          V_ESISTE_PART := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_ESISTE_PARTIZIONE(V_TBL,V_PARTITION,P_REC.SEQ_FLUSSO);
+          if(V_ESISTE_PART=1)then
+            FOR REC IN CUR_P(V_TBL) LOOP
+                V_NOTE := 'Rebuild partition indexes'||REC.COMMAND || V_PARTITION;
+                WHILE TRUE LOOP
+                  begin
+                    EXECUTE IMMEDIATE REC.COMMAND || V_PARTITION;
+                    exit;
+                  exception
+                    WHEN IN_USE THEN
+                      NULL;
+                  END;
+                end loop;
+            END LOOP;
+          end if;
+        ELSE
+          V_ESISTE_PART := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_ESISTE_SOTTOPARTIZIONE(V_TBL,V_PARTITION,P_REC.SEQ_FLUSSO);
+          IF(V_ESISTE_PART=1)THEN
+            FOR REC IN CUR_SP(V_TBL) LOOP
+              V_NOTE := 'Rebuild subpartition indexes '||rec.COMMAND || V_PARTITION;
+              WHILE TRUE LOOP
+                begin
+                    EXECUTE IMMEDIATE REC.COMMAND || V_PARTITION;
+                    exit;
+                exception
+                  WHEN IN_USE THEN
+                    NULL;
+                END;
+              end loop;
+              IF(V_PARTITION='ATTIVE_'||V_COD_ABI)THEN
+                WHILE TRUE LOOP
+                  begin
+                    EXECUTE IMMEDIATE REC.COMMAND || replace(V_PARTITION,'ATTIVE','STORICHE');
+                    exit;
+                  exception
+                    WHEN IN_USE THEN
+                      NULL;
+                  END;
+                end loop;
+              END IF;
+            END LOOP;
+          end if;
+        END IF;
+      end loop;
+
+      RETURN ok;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+        PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO, c_package || '.fnc_rebuild_indexes', PKG_MCRES_AUDIT.C_ERROR,sqlcode,SQLERRM, 'TABLE='||V_TBL||' - '||V_NOTE );
+        RETURN KO;
+  END FNC_rebuild_indexes;
+
+END;
+/
+
+
+CREATE SYNONYM MCRE_APP.PKG_MCRES_ANALYZE FOR MCRE_OWN.PKG_MCRES_ANALYZE;
+
+
+CREATE SYNONYM MCRE_USR.PKG_MCRES_ANALYZE FOR MCRE_OWN.PKG_MCRES_ANALYZE;
+
+
+GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_ANALYZE TO MCRE_USR;
+
