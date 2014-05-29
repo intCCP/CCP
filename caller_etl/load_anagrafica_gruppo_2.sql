@@ -1,0 +1,1 @@
+Insert into T_MCRE0_ETL_CALLER (CALLER,SQL_ORD,SQL_TEXT,STEP,FLG_EXEC,LAST_UPDATE_DATE,NOTE) values ('load_anagrafica_gruppo','2','insert into t_mcre0_stg_agru select * from v_mcre0_st_anagrafica_gruppo','STG','1',to_date('18-NOV-2013 00:47:46','DD-MON-YYYY HH24:MI:SS'),'insert into T_MCRE0_STG_AGRU select * from V_MCRE0_ST_ANAGRAFICA_GRUPPO');
