@@ -1,0 +1,28 @@
+CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_CALENDAR_UTILS AS
+/******************************************************************************
+   NAME:       PKG_CALENDAR_UTILS
+   PURPOSE:
+
+   REVISIONS:
+   Ver        Date        Author           Description
+   ---------  ----------  ---------------  ------------------------------------
+   1.0        02/09/2012  i.gueorguieva           1. Created this package.
+******************************************************************************/
+
+-- PER LE FESTIVITA' FISSE USA T_MCREI_WRK_GIORNI_LAVORATIVI
+FUNCTION FNC_GET_PCR_MENO_2(P_ID_DPER IN NUMBER) RETURN DATE;
+FUNCTION FNC_IS_SAB_DOM(V_DAY IN DATE) RETURN NUMBER;
+FUNCTION FNC_IS_FESTIVO(V_DAY IN DATE) RETURN NUMBER;
+FUNCTION FNC_GET_PASQUA_LUN(V_ANNO IN DATE) RETURN DATE;
+END PKG_CALENDAR_UTILS;
+/
+
+
+CREATE SYNONYM MCRE_APP.PKG_CALENDAR_UTILS FOR MCRE_OWN.PKG_CALENDAR_UTILS;
+
+
+CREATE SYNONYM MCRE_USR.PKG_CALENDAR_UTILS FOR MCRE_OWN.PKG_CALENDAR_UTILS;
+
+
+GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_CALENDAR_UTILS TO MCRE_USR;
+
