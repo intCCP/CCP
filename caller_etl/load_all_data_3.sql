@@ -1,0 +1,1 @@
+Insert into T_MCRE0_ETL_CALLER (CALLER,SQL_ORD,SQL_TEXT,STEP,FLG_EXEC,LAST_UPDATE_DATE,NOTE) values ('load_all_data','3','truncate table t_mcre0_all_data_inactive reuse storage','ALL','1',to_date('09-DIC-2013 17:51:23','DD-MON-YYYY HH24:MI:SS'),'truncate table t_mcre0_all_data_inactive');
