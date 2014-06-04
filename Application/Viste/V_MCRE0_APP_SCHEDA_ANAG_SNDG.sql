@@ -11,6 +11,11 @@ data   : 22.04.2014
 desc   : Variazione Perimetro DR: aggiunta campo COD_GRUPPO_SUPER
 Autore : Reply - S. De Cesaris
 
+mod    : 002
+data   : 04.06.2014
+desc   : Fix calcolo COD_COMPARTO per l'estrazione delle Direzioni Generali
+Autore : Reply - S. De Cesaris
+
 mod    :
 data   :
 desc   :
