@@ -1,0 +1,81 @@
+/* Formatted on 17/06/2014 17:59:23 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.T_MCRES_APP_ISTITUTI
+(
+   COD_ISTITUTO,
+   COD_ABI,
+   DESC_ISTITUTO,
+   DESC_BREVE,
+   COD_ISTITUTO_SOA,
+   COD_ABI_VISUALIZZATO,
+   FLG_OUTSOURCING,
+   FLG_TARGET,
+   FLG_CARTOLARIZZATO,
+   FLG_CHIUSURA_MANCATO_AGG,
+   FLG_SEGREGATO,
+   COD_ABI_ISTITUTO,
+   FLG_CCP,
+   FLG_SOFF,
+   FLG_TIPO_ABI,
+   VAL_ORDINE,
+   DESC_TIPO_ABI,
+   VAL_ORDINE_TIPO_ABI,
+   FLG_FINANCE,
+   VAL_SEDE_L_CAP,
+   VAL_SEDE_L_PROVINCIA,
+   VAL_STRUTTURA_CAP,
+   VAL_STRUTTURA_PROVINCIA,
+   FLG_OUTSOURCING_DRC,
+   FLG_SERVICING_PLF,
+   FLG_CESSIONE_ROUT,
+   VAL_IND_STRUTTURA,
+   VAL_NOTE,
+   VAL_IND_SEDE_LEGALE,
+   VAL_STRUTTURA,
+   VAL_SEDE_L_CITTA,
+   VAL_STRUTTURA_CITTA,
+   FLG_INVIO_DELIBERE_SISBA,
+   FLG_SERVICING_ITF
+)
+AS
+   SELECT                             -- 20120821 ag  flg_invio_delibere_sisba
+                                             -- 20130208 ag  flg_servicing_itf
+         cod_istituto,
+         cod_abi,
+         desc_istituto,
+         desc_breve,
+         cod_istituto_soa,
+         cod_abi_visualizzato,
+         flg_outsourcing,
+         flg_target,
+         flg_cartolarizzato,
+         flg_chiusura_mancato_agg,
+         flg_segregato,
+         cod_abi_istituto,
+         flg_ccp,
+         flg_soff,
+         flg_tipo_abi,
+         val_ordine,
+         desc_tipo_abi,
+         val_ordine_tipo_abi,
+         flg_finance,
+         val_sede_l_cap,
+         val_sede_l_provincia,
+         val_struttura_cap,
+         val_struttura_provincia,
+         flg_outsourcing_drc,
+         flg_servicing_plf,
+         flg_cessione_rout,
+         val_ind_struttura,
+         val_note,
+         val_ind_sede_legale,
+         val_struttura,
+         val_sede_l_citta,
+         val_struttura_citta,
+         flg_invio_delibere_sisba,
+         --
+         flg_servicing_itf
+    FROM t_mcre0_app_istituti_all
+   WHERE 0 = 0 AND flg_soff = 1;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON MCRE_OWN.T_MCRES_APP_ISTITUTI TO MCRE_USR;

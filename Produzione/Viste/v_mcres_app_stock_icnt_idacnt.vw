@@ -1,0 +1,207 @@
+/* Formatted on 17/06/2014 18:11:46 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_STOCK_ICNT_IDACNT
+(
+   COD_ABI,
+   VAL_ANNOMESE,
+   FLG_GAR_REALI,
+   FLG_GAR_REALI_PERSONALI,
+   VAL_TOT_NDG_STOCK,
+   VAL_VANTATO_STOCK,
+   VAL_GBV_STOCK,
+   VAL_NBV_STOCK,
+   VAL_TOT_NDG_INC,
+   VAL_VANTATO_INC,
+   VAL_GBV_INC,
+   VAL_NBV_INC,
+   VAL_TOT_NDG_IDC_OV,
+   VAL_VANTATO_IDC_OV,
+   VAL_GBV_IDC_OV,
+   VAL_NBV_IDC_OV,
+   VAL_TOT_NDG_IDC_UN,
+   VAL_VANTATO_IDC_UN,
+   VAL_GBV_IDC_UN,
+   VAL_NBV_IDC_UN,
+   VAL_TOT_NDG_CR,
+   VAL_GBV_CR,
+   VAL_NBV_CR,
+   VAL_INDICE_COPERTURA_IDC
+)
+AS
+   SELECT                                   --     v1.0 29/07/2011 VG: created
+                    --     v1.1 10/08/2011 AG: splitted idc, inserted coalesce
+                              --     v1.1 11/08/2011 AG: splitted cessoni rut.
+                                        --     v1.2 19/10/2011 VG: abs vantato
+                                   --     v1.3 02/11/2011 AG: removed coalesce
+ --     v1.4 30/12/2011 AG: unique select for nuovi ingressi da contabilizzare
+                                --     v1.5 03/01/2011 AG: indice di copertura
+                                 --     v1.6 30/01/2012 AG: inserite stime nbv
+               --     v1.7 16/02/2012 AG: Istituti non target e gruppo finance
+ --     v1.8 01/03/2012 AG: Filtri su tipo record e stato rischio per istituti non target
+        cod_abi,
+        val_annomese,
+        flg_gar_reali,
+        flg_gar_reali_personali,
+        --     stock
+        val_tot_ndg_stock,
+        ABS (val_vantato_stock) val_vantato_stock,
+        val_gbv_stock,
+        val_nbv_stock,
+        --     ing cont (ingressi contabilizzati)
+        val_tot_ndg_inc,
+        ABS (val_vantato_inc) val_vantato_inc,
+        val_gbv_inc,
+        val_nbv_inc,
+        --     ingressi da cont gbv>= 250k
+        val_tot_ndg_idc_ov,
+        NULL val_vantato_idc_ov,
+        val_gbv_idc_ov,
+        val_nbv_idc_ov,
+        --     ingressi da cont < 250k
+        val_tot_ndg_idc_un,
+        NULL val_vantato_idc_un,
+        val_gbv_idc_un,
+        val_nbv_idc_un,
+        --     cessione routinaria
+        val_tot_ndg_cr,
+        --null val_vantato_cr,
+        val_gbv_cr,
+        val_nbv_cr,
+        val_indice_copertura_idc
+   FROM (SELECT s.cod_abi,
+                s.val_annomese,
+                s.flg_gar_reali,
+                s.flg_gar_reali_personali,
+                s.val_tot_ndg val_tot_ndg_stock,
+                s.val_vantato val_vantato_stock,
+                s.val_gbv val_gbv_stock,
+                s.val_nbv val_nbv_stock,
+                NULL val_tot_ndg_inc,
+                NULL val_vantato_inc,
+                NULL val_gbv_inc,
+                NULL val_nbv_inc,
+                NULL val_tot_ndg_idc_ov,
+                --null val_vantato_idc_ov,
+                NULL val_gbv_idc_ov,
+                NULL val_nbv_idc_ov,
+                NULL val_tot_ndg_idc_un,
+                --null val_vantato_idc_un,
+                NULL val_gbv_idc_un,
+                NULL val_nbv_idc_un,
+                NULL val_tot_ndg_cr,
+                --null val_vantato_cr,
+                NULL val_gbv_cr,
+                NULL val_nbv_cr,
+                NULL val_indice_copertura_idc
+           FROM t_mcres_fen_stock s
+         UNION ALL
+         SELECT s.cod_abi,
+                s.val_annomese,
+                s.flg_gar_reali,
+                s.flg_gar_reali_personali,
+                NULL val_tot_ndg_stock,
+                NULL val_vantato_stock,
+                NULL val_gbv_stock,
+                NULL val_nbv_stock,
+                s.val_tot_ndg val_tot_ndg_inc,
+                s.val_vantato val_vantato_inc,
+                s.val_gbv val_gbv_inc,
+                s.val_nbv val_nbv_inc,
+                NULL val_tot_ndg_idc_ov,
+                --null val_vantato_idc_ov,
+                NULL val_gbv_idc_ov,
+                NULL val_nbv_idc_ov,
+                NULL val_tot_ndg_idc_un,
+                --null val_vantato_idc_un,
+                NULL val_gbv_idc_un,
+                NULL val_nbv_idc_un,
+                NULL val_tot_ndg_cr,
+                --null val_vantato_cr,
+                NULL val_gbv_cr,
+                NULL val_nbv_cr,
+                NULL val_indice_copertura_idc
+           FROM t_mcres_fen_nuovi_ingr_cont s
+         UNION ALL
+         SELECT s.cod_abi,
+                TO_NUMBER (s.val_annomese) val_annomese,
+                0 flg_gar_reali,
+                0 flg_gar_reali_personali,
+                NULL val_tot_ndg_stock,
+                NULL val_vantato_stock,
+                NULL val_gbv_stock,
+                NULL val_nbv_stock,
+                NULL val_tot_ndg_inc,
+                NULL val_vantato_inc,
+                NULL val_gbv_inc,
+                NULL val_nbv_inc,
+                s.val_tot_ndg_over val_tot_ndg_idc_ov,
+                --null val_vantato_idc_ov,
+                s.val_gbv_over val_gbv_idc_ov,
+                s.val_stima_nbv_over val_nbv_idc_ov,
+                s.val_tot_ndg_under val_tot_ndg_idc_un,
+                --null val_vantato_idc_un,
+                s.val_gbv_under val_gbv_idc_un,
+                s.val_stima_nbv_under val_nbv_idc_un,
+                s.val_tot_ndg_cr val_tot_ndg_cr,
+                --null val_vantato_cr,
+                s.val_gbv_cr val_gbv_cr,
+                s.val_stima_nbv_cr,
+                s.val_indice_copertura val_indice_copertura_idc
+           FROM t_mcres_fen_nuovi_ingr_dacont s
+         UNION ALL
+         SELECT s.cod_abi,
+                s.val_annomese,
+                0 flg_gar_reali,
+                0 flg_gar_reali_personali,
+                s.val_tot_ndg_stk val_tot_ndg_stock,
+                s.val_vantato_stk val_vantato_stock,
+                s.val_gbv_stk val_gbv_stock,
+                s.val_nbv_stk val_nbv_stock,
+                s.val_tot_ndg_ic val_tot_ndg_inc,
+                NULL val_vantato_inc,
+                s.val_gbv_ic val_gbv_inc,
+                s.val_nbv_ic val_nbv_inc,
+                NULL val_tot_ndg_idc_ov,
+                --null val_vantato_idc_ov,
+                NULL val_gbv_idc_ov,
+                NULL val_nbv_idc_ov,
+                NULL val_tot_ndg_idc_un,
+                --null val_vantato_idc_un,
+                NULL val_gbv_idc_un,
+                NULL val_nbv_idc_un,
+                NULL val_tot_ndg_cr,
+                --null val_vantato_cr,
+                NULL val_gbv_cr,
+                NULL val_nbv_cr,
+                NULL val_indice_copertura_idc
+           FROM t_mcres_app_finance s
+         UNION ALL
+         SELECT s.cod_abi,
+                s.id_dper val_annomese,
+                0 flg_gar_reali,
+                0 flg_gar_reali_personali,
+                s.val_num_pos val_tot_ndg_stock,
+                s.val_vantato val_vantato_stock,
+                s.val_gbv val_gbv_stock,
+                s.val_nbv val_nbv_stock,
+                NULL val_tot_ndg_inc,
+                NULL val_vantato_inc,
+                NULL val_gbv_inc,
+                NULL val_nbv_inc,
+                NULL val_tot_ndg_idc_ov,
+                --null val_vantato_idc_ov,
+                NULL val_gbv_idc_ov,
+                NULL val_nbv_idc_ov,
+                NULL val_tot_ndg_idc_un,
+                --null val_vantato_idc_un,
+                NULL val_gbv_idc_un,
+                NULL val_nbv_idc_un,
+                NULL val_tot_ndg_cr,
+                --null val_vantato_cr,
+                NULL val_gbv_cr,
+                NULL val_nbv_cr,
+                NULL val_indice_copertura_idc
+           FROM t_mcres_app_ptf_non_target s
+          WHERE tipo_record = 1 AND cod_stato_rischio = 'S') a;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON MCRE_OWN.V_MCRES_APP_STOCK_ICNT_IDACNT TO MCRE_USR;
