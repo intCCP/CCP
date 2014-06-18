@@ -1,0 +1,489 @@
+/* Formatted on 17/06/2014 18:03:41 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_RIO_ESP_GE_ANN
+(
+   COD_ABI_CARTOLARIZZATO,
+   COD_ABI_ISTITUTO,
+   DESC_ISTITUTO,
+   COD_NDG,
+   COD_SNDG,
+   COD_STATO_AT,
+   DTA_CONTROLLO_AT,
+   DTA_PCR_AT,
+   GESB_ACC_CASSA_BT_AT,
+   GESB_UTI_CASSA_BT_AT,
+   GESB_ACC_SMOBILIZZO_AT,
+   GESB_UTI_SMOBILIZZO_AT,
+   GESB_ACC_CASSA_MLT_AT,
+   GESB_UTI_CASSA_MLT_AT,
+   GESB_ACC_FIRMA_AT,
+   GESB_UTI_FIRMA_AT,
+   GESB_ACC_TOT_AT,
+   GESB_UTI_TOT_AT,
+   GESB_TOT_GAR_AT,
+   GESB_ACC_SOSTITUZIONI_AT,
+   GESB_UTI_SOSTITUZIONI_AT,
+   GESB_ACC_MASSIMALI_AT,
+   GESB_UTI_MASSIMALI_AT,
+   GEGB_ACC_CASSA_BT_AT,
+   GEGB_UTI_CASSA_BT_AT,
+   GEGB_ACC_SMOBILIZZO_AT,
+   GEGB_UTI_SMOBILIZZO_AT,
+   GEGB_ACC_CASSA_MLT_AT,
+   GEGB_UTI_CASSA_MLT_AT,
+   GEGB_ACC_FIRMA_AT,
+   GEGB_UTI_FIRMA_AT,
+   GEGB_TOT_GAR_AT,
+   GEGB_ACC_SOSTITUZIONI_AT,
+   GEGB_UTI_SOSTITUZIONI_AT,
+   GEGB_ACC_MASSIMALI_AT,
+   GEGB_UTI_MASSIMALI_AT,
+   GEGB_UTI_TOT_AT,
+   GEGB_ACC_TOT_AT,
+   GESB_QIS_ACC_AT,
+   GESB_QIS_UTI_AT,
+   GEGB_QIS_ACC_AT,
+   GEGB_QIS_UTI_AT,
+   DTA_CR_AT,
+   COD_STATO_MP,
+   DTA_CONTROLLO_MP,
+   DTA_PCR_MP,
+   DTA_CR_MP,
+   GESB_ACC_CASSA_BT_MP,
+   GESB_UTI_CASSA_BT_MP,
+   GESB_ACC_SMOBILIZZO_MP,
+   GESB_UTI_SMOBILIZZO_MP,
+   GESB_ACC_CASSA_MLT_MP,
+   GESB_UTI_CASSA_MLT_MP,
+   GESB_ACC_FIRMA_MP,
+   GESB_UTI_FIRMA_MP,
+   GESB_ACC_TOT_MP,
+   GESB_UTI_TOT_MP,
+   GESB_TOT_GAR_MP,
+   GESB_ACC_SOSTITUZIONI_MP,
+   GESB_UTI_SOSTITUZIONI_MP,
+   GESB_ACC_MASSIMALI_MP,
+   GESB_UTI_MASSIMALI_MP,
+   GEGB_ACC_CASSA_BT_MP,
+   GEGB_UTI_CASSA_BT_MP,
+   GEGB_ACC_SMOBILIZZO_MP,
+   GEGB_UTI_SMOBILIZZO_MP,
+   GEGB_ACC_CASSA_MLT_MP,
+   GEGB_UTI_CASSA_MLT_MP,
+   GEGB_ACC_FIRMA_MP,
+   GEGB_UTI_FIRMA_MP,
+   GEGB_TOT_GAR_MP,
+   GEGB_ACC_SOSTITUZIONI_MP,
+   GEGB_UTI_SOSTITUZIONI_MP,
+   GEGB_ACC_MASSIMALI_MP,
+   GEGB_UTI_MASSIMALI_MP,
+   GEGB_UTI_TOT_MP,
+   GEGB_ACC_TOT_MP,
+   GESB_QIS_ACC_MP,
+   GESB_QIS_UTI_MP,
+   GEGB_QIS_ACC_MP,
+   GEGB_QIS_UTI_MP,
+   COD_STATO_LY,
+   DTA_CONTROLLO_LY,
+   DTA_PCR_LY,
+   DTA_CR_LY,
+   GESB_ACC_CASSA_BT_LY,
+   GESB_UTI_CASSA_BT_LY,
+   GESB_ACC_SMOBILIZZO_LY,
+   GESB_UTI_SMOBILIZZO_LY,
+   GESB_ACC_CASSA_MLT_LY,
+   GESB_UTI_CASSA_MLT_LY,
+   GESB_ACC_FIRMA_LY,
+   GESB_UTI_FIRMA_LY,
+   GESB_ACC_TOT_LY,
+   GESB_UTI_TOT_LY,
+   GESB_TOT_GAR_LY,
+   GESB_ACC_SOSTITUZIONI_LY,
+   GESB_UTI_SOSTITUZIONI_LY,
+   GESB_ACC_MASSIMALI_LY,
+   GESB_UTI_MASSIMALI_LY,
+   GEGB_ACC_CASSA_BT_LY,
+   GEGB_UTI_CASSA_BT_LY,
+   GEGB_ACC_SMOBILIZZO_LY,
+   GEGB_UTI_SMOBILIZZO_LY,
+   GEGB_ACC_CASSA_MLT_LY,
+   GEGB_UTI_CASSA_MLT_LY,
+   GEGB_ACC_FIRMA_LY,
+   GEGB_UTI_FIRMA_LY,
+   GEGB_TOT_GAR_LY,
+   GEGB_ACC_SOSTITUZIONI_LY,
+   GEGB_UTI_SOSTITUZIONI_LY,
+   GEGB_ACC_MASSIMALI_LY,
+   GEGB_UTI_MASSIMALI_LY,
+   GEGB_ACC_TOT_LY,
+   GEGB_UTI_TOT_LY,
+   GESB_QIS_ACC_LY,
+   GESB_QIS_UTI_LY,
+   GEGB_QIS_ACC_LY,
+   GEGB_QIS_UTI_LY
+)
+AS
+   SELECT                                              -- V2 09/05/2011 VG: CR
+          -- v3 08/07/2011 MM: massimali e sostituzioni
+          COD_ABI_CARTOLARIZZATO,
+          COD_ABI_ISTITUTO,
+          DESC_ISTITUTO,
+          COD_NDG,
+          COD_SNDG,
+          COD_STATO_AT,
+          DTA_CONTROLLO_AT,
+          DTA_PCR_AT,
+          GESB_ACC_CASSA_BT_AT,
+          GESB_UTI_CASSA_BT_AT,
+          GESB_ACC_SMOBILIZZO_AT,
+          GESB_UTI_SMOBILIZZO_AT,
+          GESB_ACC_CASSA_MLT_AT,
+          GESB_UTI_CASSA_MLT_AT,
+          GESB_ACC_FIRMA_AT,
+          GESB_UTI_FIRMA_AT,
+          GESB_ACC_TOT_AT,
+          GESB_UTI_TOT_AT,
+          GESB_TOT_GAR_AT,
+          --
+          GESB_ACC_SOSTITUZIONI_AT,
+          GESB_UTI_SOSTITUZIONI_AT,
+          GESB_ACC_MASSIMALI_AT,
+          GESB_UTI_MASSIMALI_AT,
+          --
+          GEGB_ACC_CASSA_BT_AT,
+          GEGB_UTI_CASSA_BT_AT,
+          GEGB_ACC_SMOBILIZZO_AT,
+          GEGB_UTI_SMOBILIZZO_AT,
+          GEGB_ACC_CASSA_MLT_AT,
+          GEGB_UTI_CASSA_MLT_AT,
+          GEGB_ACC_FIRMA_AT,
+          GEGB_UTI_FIRMA_AT,
+          GEGB_TOT_GAR_AT,
+          --
+          GEGB_ACC_SOSTITUZIONI_AT,
+          GEGB_UTI_SOSTITUZIONI_AT,
+          GEGB_ACC_MASSIMALI_AT,
+          GEGB_UTI_MASSIMALI_AT,
+          --
+          GEGB_UTI_TOT_AT,
+          GEGB_ACC_TOT_AT,
+          GESB_QIS_ACC_AT,
+          GESB_QIS_UTI_AT,
+          GEGB_QIS_ACC_AT,
+          GEGB_QIS_UTI_AT,
+          DTA_CR_AT,
+          COD_STATO_MP,
+          DTA_CONTROLLO_MP,
+          DTA_PCR_MP,
+          DTA_CR_MP,
+          GESB_ACC_CASSA_BT_MP,
+          GESB_UTI_CASSA_BT_MP,
+          GESB_ACC_SMOBILIZZO_MP,
+          GESB_UTI_SMOBILIZZO_MP,
+          GESB_ACC_CASSA_MLT_MP,
+          GESB_UTI_CASSA_MLT_MP,
+          GESB_ACC_FIRMA_MP,
+          GESB_UTI_FIRMA_MP,
+          GESB_ACC_TOT_MP,
+          GESB_UTI_TOT_MP,
+          GESB_TOT_GAR_MP,
+          --
+          GESB_ACC_SOSTITUZIONI_MP,
+          GESB_UTI_SOSTITUZIONI_MP,
+          GESB_ACC_MASSIMALI_MP,
+          GESB_UTI_MASSIMALI_MP,
+          --
+          GEGB_ACC_CASSA_BT_MP,
+          GEGB_UTI_CASSA_BT_MP,
+          GEGB_ACC_SMOBILIZZO_MP,
+          GEGB_UTI_SMOBILIZZO_MP,
+          GEGB_ACC_CASSA_MLT_MP,
+          GEGB_UTI_CASSA_MLT_MP,
+          GEGB_ACC_FIRMA_MP,
+          GEGB_UTI_FIRMA_MP,
+          GEGB_TOT_GAR_MP,
+          --
+          GEGB_ACC_SOSTITUZIONI_MP,
+          GEGB_UTI_SOSTITUZIONI_MP,
+          GEGB_ACC_MASSIMALI_MP,
+          GEGB_UTI_MASSIMALI_MP,
+          --
+          GEGB_UTI_TOT_MP,
+          GEGB_ACC_TOT_MP,
+          GESB_QIS_ACC_MP,
+          GESB_QIS_UTI_MP,
+          GEGB_QIS_ACC_MP,
+          GEGB_QIS_UTI_MP,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, COD_STATO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, COD_STATO_LY2,
+                     COD_STATO_LY))
+             COD_STATO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, DTA_CONTROLLO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, DTA_CONTROLLO_LY2,
+                     DTA_CONTROLLO_LY))
+             DTA_CONTROLLO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, DTA_PCR_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, DTA_PCR_LY2,
+                     DTA_PCR_LY))
+             DTA_PCR_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, DTA_CR_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, DTA_CR_LY2,
+                     DTA_CR_LY))
+             DTA_CR_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_CASSA_BT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_CASSA_BT_LY2,
+                     GESB_ACC_CASSA_BT_LY))
+             GESB_ACC_CASSA_BT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_CASSA_BT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_CASSA_BT_LY2,
+                     GESB_UTI_CASSA_BT_LY))
+             GESB_UTI_CASSA_BT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_SMOBILIZZO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_SMOBILIZZO_LY2,
+                     GESB_ACC_SMOBILIZZO_LY))
+             GESB_ACC_SMOBILIZZO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_SMOBILIZZO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_SMOBILIZZO_LY2,
+                     GESB_UTI_SMOBILIZZO_LY))
+             GESB_UTI_SMOBILIZZO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_CASSA_MLT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_CASSA_MLT_LY2,
+                     GESB_ACC_CASSA_MLT_LY))
+             GESB_ACC_CASSA_MLT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_CASSA_MLT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_CASSA_MLT_LY2,
+                     GESB_UTI_CASSA_MLT_LY))
+             GESB_UTI_CASSA_MLT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_FIRMA_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_FIRMA_LY2,
+                     GESB_ACC_FIRMA_LY))
+             GESB_ACC_FIRMA_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_FIRMA_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_FIRMA_LY2,
+                     GESB_UTI_FIRMA_LY))
+             GESB_UTI_FIRMA_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_TOT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_TOT_LY2,
+                     GESB_ACC_TOT_LY))
+             GESB_ACC_TOT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_TOT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_TOT_LY2,
+                     GESB_UTI_TOT_LY))
+             GESB_UTI_TOT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_TOT_GAR_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_TOT_GAR_LY2,
+                     GESB_TOT_GAR_LY))
+             GESB_TOT_GAR_LY,
+          --
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_SOSTITUZIONI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_SOSTITUZIONI_LY2,
+                     GESB_ACC_SOSTITUZIONI_LY))
+             GESB_ACC_SOSTITUZIONI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_SOSTITUZIONI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_SOSTITUZIONI_LY2,
+                     GESB_UTI_SOSTITUZIONI_LY))
+             GESB_UTI_SOSTITUZIONI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_ACC_MASSIMALI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_ACC_MASSIMALI_LY2,
+                     GESB_ACC_MASSIMALI_LY))
+             GESB_ACC_MASSIMALI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_UTI_MASSIMALI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_UTI_MASSIMALI_LY2,
+                     GESB_UTI_MASSIMALI_LY))
+             GESB_UTI_MASSIMALI_LY,
+          --
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_CASSA_BT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_CASSA_BT_LY2,
+                     GEGB_ACC_CASSA_BT_LY))
+             GEGB_ACC_CASSA_BT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_CASSA_BT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_CASSA_BT_LY2,
+                     GEGB_UTI_CASSA_BT_LY))
+             GEGB_UTI_CASSA_BT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_SMOBILIZZO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_SMOBILIZZO_LY2,
+                     GEGB_ACC_SMOBILIZZO_LY))
+             GEGB_ACC_SMOBILIZZO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_SMOBILIZZO_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_SMOBILIZZO_LY2,
+                     GEGB_UTI_SMOBILIZZO_LY))
+             GEGB_UTI_SMOBILIZZO_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_CASSA_MLT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_CASSA_MLT_LY2,
+                     GEGB_ACC_CASSA_MLT_LY))
+             GEGB_ACC_CASSA_MLT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_CASSA_MLT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_CASSA_MLT_LY2,
+                     GEGB_UTI_CASSA_MLT_LY))
+             GEGB_UTI_CASSA_MLT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_FIRMA_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_FIRMA_LY2,
+                     GEGB_ACC_FIRMA_LY))
+             GEGB_ACC_FIRMA_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_FIRMA_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_FIRMA_LY2,
+                     GEGB_UTI_FIRMA_LY))
+             GEGB_UTI_FIRMA_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_TOT_GAR_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_TOT_GAR_LY2,
+                     GEGB_TOT_GAR_LY))
+             GEGB_TOT_GAR_LY,
+          --
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_SOSTITUZIONI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_SOSTITUZIONI_LY2,
+                     GEGB_ACC_SOSTITUZIONI_LY))
+             GEGB_ACC_SOSTITUZIONI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_SOSTITUZIONI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_SOSTITUZIONI_LY2,
+                     GEGB_UTI_SOSTITUZIONI_LY))
+             GEGB_UTI_SOSTITUZIONI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_MASSIMALI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_MASSIMALI_LY2,
+                     GEGB_ACC_MASSIMALI_LY))
+             GEGB_ACC_MASSIMALI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_MASSIMALI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_MASSIMALI_LY2,
+                     GEGB_UTI_MASSIMALI_LY))
+             GEGB_UTI_MASSIMALI_LY,
+          --
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_ACC_TOT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_ACC_TOT_LY2,
+                     GEGB_ACC_TOT_LY))
+             GEGB_ACC_TOT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_UTI_TOT_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_UTI_TOT_LY2,
+                     GEGB_UTI_TOT_LY))
+             GEGB_UTI_TOT_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_QIS_ACC_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_QIS_ACC_LY2,
+                     GESB_QIS_ACC_LY))
+             GESB_QIS_ACC_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GESB_QIS_UTI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GESB_QIS_UTI_LY2,
+                     GESB_QIS_UTI_LY))
+             GESB_QIS_UTI_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_QIS_ACC_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_QIS_ACC_LY2,
+                     GEGB_QIS_ACC_LY))
+             GEGB_QIS_ACC_LY,
+          DECODE (
+             DTA_CONTROLLO_LY,
+             DTA_CONTROLLO_AT, GEGB_QIS_UTI_LY2,
+             DECODE (DTA_CONTROLLO_LY,
+                     DTA_CONTROLLO_MP, GEGB_QIS_UTI_LY2,
+                     GEGB_QIS_UTI_LY))
+             GEGB_QIS_UTI_LY
+     FROM MV_MCRE0_APP_RIO_ESP_GE_ANN;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON MCRE_OWN.V_MCRE0_APP_RIO_ESP_GE_ANN TO MCRE_USR;

@@ -1,0 +1,14 @@
+/* Formatted on 17/06/2014 18:01:22 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_DATE_MATRICE_SA
+(
+   DTA_RIFERIMENTO_FLUSSO,
+   DTA_AGGIORNAMENTO_PCR
+)
+AS
+   SELECT TO_DATE (id_dper, 'YYYYMMDD') AS dta_riferimento_flusso,
+          TRUNC (dta_upd) AS dta_aggiornamento_pcr
+     FROM t_mcrei_app_pcr_rapporti
+    WHERE ROWNUM < 2;
+
+
+GRANT SELECT ON MCRE_OWN.V_MCRE0_APP_DATE_MATRICE_SA TO MCRE_USR;
