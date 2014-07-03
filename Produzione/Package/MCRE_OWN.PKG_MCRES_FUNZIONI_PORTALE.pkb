@@ -113,6 +113,8 @@ AS
 	3.11  26/03/2014    V.Galli     to_date dta_solare_operazione in  fnc_insert_contropartita
     3.12 08/04/2014     V.Galli    flg_tipo_rapporto
 	3.13 05/05/2014     A.Pilloni  fix inserimento spese anche se annullate da mople
+	3.14 07/05/2014    A.Pilloni  aggiunta parametro flg_urgente in fnc_gestione_raccolta_doc
+    3.15 10/06/2014    V.Galli    flg_blocco_invio_sap
 ******************************************************************************/
 -- Funzione aggiornamento alert
 /*
@@ -908,7 +910,7 @@ FUNCTION fnc_aggiorna_stato_spesa(
 
     BEGIN
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  parametri input per stato AN';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  parametri input per stato AN';
     if (p_cod_autorizzazione is null and p_desc_mot_annul_spesa is null)
     then
         pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'Parametri di input non validi. I parametri p_cod_autorizzazione e p_desc_mot_annul_spesa non possono essere nulli. COD_AUTORIZZAZIONE = '
@@ -1144,14 +1146,14 @@ BEGIN
       (
         P_COD_ABI ,
         P_COD_ABI_CARTOLARIZZANTE ,
-        --AP 12/10/2012 CABLATO COD_DIVISA A 'EUR' PERCHÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿ I RAPPORTI INSERITI DA CRUSSOTTO HANNO SEMPRE COD_DIVISA = EUR
+        --AP 12/10/2012 CABLATO COD_DIVISA A 'EUR' PERCHÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿ I RAPPORTI INSERITI DA CRUSSOTTO HANNO SEMPRE COD_DIVISA = EUR
         'EUR', --P_COD_DIVISA
         P_COD_FORMA_TECNICA ,
         P_COD_NDG ,
         P_COD_OPERATORE_INS_UPD ,
         P_COD_RAPPORTO ,
         P_COD_SNDG ,
-        --AP 12/10/2012 CABLATO COD_SSA A MO PERCHÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿ I RAPPORTI INSERITI DA CRUSSOTTO HANNO SEMPRE COD_SSA = MO
+        --AP 12/10/2012 CABLATO COD_SSA A MO PERCHÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿ I RAPPORTI INSERITI DA CRUSSOTTO HANNO SEMPRE COD_SSA = MO
         'MO', --P_COD_SSA
         P_COD_TIPO_FONDO_TERZO ,
         P_COD_UO_RAPPORTO ,
@@ -2015,7 +2017,8 @@ FUNCTION fnc_mcres_ins_upd_spese
     L_VAL_ALIQUOTA_RITENUTA      IN NUMBER,
     L_VAL_PERC_RITENUTA          IN NUMBER,
     l_val_wbs                    in t_mcres_app_sp_spese.val_wbs%type default null,
-    v_controllo_fattura          out number
+    v_controllo_fattura          out number,
+    p_FLG_BLOCCO_INVIO_SAP t_mcres_app_sp_spese.FLG_BLOCCO_INVIO_SAP%type default null
   )
   RETURN VARCHAR2
 IS
@@ -2217,7 +2220,8 @@ BEGIN
         VAL_ALIQUOTA_RITENUTA = L_VAL_ALIQUOTA_RITENUTA,
         VAL_PERC_RITENUTA = L_VAL_PERC_RITENUTA,
         val_wbs = l_val_wbs,
-        val_rappresentante = L_VAL_RAPPRESENTANTE
+        val_rappresentante = L_VAL_RAPPRESENTANTE,
+        FLG_BLOCCO_INVIO_SAP = p_FLG_BLOCCO_INVIO_SAP
       WHERE Cod_Autorizzazione     = L_Cod_Autorizzazione;
       L_Ritorno                   := 'OK';
       Pkg_Mcres_Audit.Log_App('PKG_MCRES_FUNZIONI_PORTALE.fnc_mcres_ins_upd_spese',pkg_mcres_audit.c_debug,SQLCODE,Sqlerrm,'aggiornamento spesa riuscito COD_AUTORIZZAZ = ' || L_COD_AUTORIZZAZIONE,Utente);
@@ -2242,7 +2246,7 @@ BEGIN
       --FROM DUAL;
       IF (L_COD_autorizzazione IS NULL) THEN
 
-      --AP 13112013 commentato perchÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¡ ho aggiunto chiamata funzione generazione cod_Autorizzazione
+      --AP 13112013 commentato perchÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¡ ho aggiunto chiamata funzione generazione cod_Autorizzazione
         /*SELECT cod_societa||9||to_char(sysdate,'YYYY')||lpad(SEQ_MCRES_SPESE.nextval,7,'0')
         INTO L_cod_autorizzazione
          FROM t_mcres_cl_sap
@@ -2338,7 +2342,8 @@ BEGIN
         VAL_ALIQUOTA_RITENUTA,
         VAL_PERC_RITENUTA,
         val_wbs,
-        val_rappresentante
+        val_rappresentante,
+        FLG_BLOCCO_INVIO_SAP
         )
         VALUES
         (
@@ -2425,7 +2430,8 @@ BEGIN
           L_VAL_ALIQUOTA_RITENUTA,
           L_VAL_PERC_RITENUTA,
           l_val_wbs,
-          l_val_rappresentante
+          l_val_rappresentante,
+          p_FLG_BLOCCO_INVIO_SAP
         );
 
 
@@ -2548,7 +2554,7 @@ begin
     AG 20120803
         if v_cod_stato_delibera = 'CO'
         then
-            pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'Impossibile variare lo stato. Delibera giÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  confermata' ,p_utente);
+            pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'Impossibile variare lo stato. Delibera giÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  confermata' ,p_utente);
             return ko;
         end if;
 */
@@ -2950,7 +2956,7 @@ is
 
 begin
 
-    v_note := 'controllo validitaÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  parametri input';
+    v_note := 'controllo validitaÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  parametri input';
     if
         p_cod_abi is null or
         p_cod_ndg is null or
@@ -3200,7 +3206,7 @@ is
 
 begin
 
-    v_note := 'Controllo validitÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  parametri input';
+    v_note := 'Controllo validitÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  parametri input';
     if
         p_cod_abi is null or
         p_cod_ndg is null or
@@ -3338,7 +3344,7 @@ return number is
 
 begin
 
-    v_note := 'controllo validitÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  parametri input';
+    v_note := 'controllo validitÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  parametri input';
     if
         p_cod_abi is null or
         p_cod_ndg is null or
@@ -4367,7 +4373,7 @@ is
 
 begin
 
-    v_note := 'Controllo validitÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¯Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿arametri di input';
+    v_note := 'Controllo validitÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¯Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿arametri di input';
 
     if      p_cod_abi   is null
         or  p_cod_ndg   is null
@@ -4621,7 +4627,7 @@ is
 
 begin
 
-    v_note := 'Controllo validitÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¯Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿Ã¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â¿arametri di input';
+    v_note := 'Controllo validitÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¯Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â¿arametri di input';
 
     if      p_id_dper                   is null
         or  p_cod_abi                   is null
@@ -4863,7 +4869,7 @@ return number is
 
 begin
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â  parametri input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â  parametri input';
     if p_cod_autorizzazione is null
     then
         pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'Parametri di input non validi: campo chiave nullo. COD_AUTORIZZAZIONE = '
@@ -4931,7 +4937,7 @@ begin
 
     pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'INIZIO', p_cod_utente);
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione id_alert input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione id_alert input';
 
     if p_id_alert is null
     then
@@ -4954,7 +4960,7 @@ begin
     end if;
 
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione soglie';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione soglie';
 
     if nvl(p_val_soglia_verde, 0) = 0 or nvl(p_val_soglia_arancio, 0) = 0 or p_val_soglia_verde >= p_val_soglia_arancio
     then
@@ -5032,7 +5038,7 @@ begin
 
     pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'INIZIO', p_cod_utente);
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione cod_abi input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione cod_abi input';
 
     if p_cod_abi is null
     then
@@ -5040,7 +5046,7 @@ begin
         return ko;
     end if;
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â esistenza istituto';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â esistenza istituto';
 
     select count(*)
     into v_exists
@@ -5143,7 +5149,7 @@ begin
 
     pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'INIZIO', p_cod_utente);
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione parametri input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione parametri input';
 
     if      p_cod_abi is null
         or p_val_spesa_rip is null
@@ -5281,7 +5287,7 @@ begin
 
     pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'INIZIO', p_cod_utente);
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione parametri input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione parametri input';
 
     if     p_cod_abi is null
         or p_cod_uo is null
@@ -5544,7 +5550,7 @@ begin
 
     pkg_mcres_audit.log_app(c_nome,pkg_mcres_audit.c_error,sqlcode,sqlerrm,'INIZIO', p_cod_utente);
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione cod_tipo_scadenza input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione cod_tipo_scadenza input';
 
     if p_cod_tipo_scadenza is null
     then
@@ -5553,7 +5559,7 @@ begin
     end if;
 
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â valorizzazione parametri input';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â valorizzazione parametri input';
 
     if  p_val_gg_prec_new is null or p_val_gg_succ_new is null or p_val_limite_scadenza_new is null
         or p_val_gg_prec_new = 0 or p_val_gg_succ_new = 0 or p_val_limite_scadenza_new = 0
@@ -5566,7 +5572,7 @@ begin
         return ko;
     end if;
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â esistenza voce scadenzario';
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â esistenza voce scadenzario';
 
     select count(*)
     into v_exists
@@ -5635,7 +5641,7 @@ return number is
 
 begin
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â esistenza proroga - ABI='||p_cod_abi||' PROTOCOLLO='||p_cod_protocollo||' DTA_ISRT='||p_dta_isrt_proroga;
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â esistenza proroga - ABI='||p_cod_abi||' PROTOCOLLO='||p_cod_protocollo||' DTA_ISRT='||p_dta_isrt_proroga;
     select count(*)
     into v_exists
     from t_mcres_app_proroghe
@@ -5742,7 +5748,7 @@ return number is
 
 begin
 
-    v_note := 'ControlloÃ¿ï¿œÃ¿ï¿œÃ¿ï¿œÃ¿Â esistenza rapporto delibera - ABI='||p_cod_abi||' PROTOCOLLO='||p_cod_protocollo||' UO_CNTRT='||p_cod_uo_cntrt||' PROD_CNTRT='||p_cod_prod_cntrt;
+    v_note := 'ControlloÃ??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã¯Â¿Â?Ã??Ã?Â esistenza rapporto delibera - ABI='||p_cod_abi||' PROTOCOLLO='||p_cod_protocollo||' UO_CNTRT='||p_cod_uo_cntrt||' PROD_CNTRT='||p_cod_prod_cntrt;
     select count(*)
     into v_exists
     from t_mcres_app_rapporti_delibere
@@ -6475,7 +6481,8 @@ function fnc_gestione_raccolta_doc(
     p_cod_ndg t_mcres_app_raccolta_doc.cod_ndg%type,
     p_cod_uo_rapporto t_mcres_app_raccolta_doc.cod_uo_rapporto%type,
     p_cod_stato_raccolta_doc t_mcres_app_raccolta_doc.cod_stato_raccolta_doc%type,
-    p_cod_matr_pratica t_mcres_app_raccolta_doc.cod_matr_pratica%type
+    p_cod_matr_pratica t_mcres_app_raccolta_doc.cod_matr_pratica%type,
+    p_flg_urgente  t_mcres_app_raccolta_doc.flg_urgente%type
 ) return number is
 
   C_NOME CONSTANT VARCHAR2(100) := C_PACKAGE || '.FNC_GESTIONE_RACCOLTA_DOC';
@@ -6502,7 +6509,8 @@ begin
             cod_stato_raccolta_doc,
             dta_ins,
             dta_upd,
-            cod_matr_pratica
+            cod_matr_pratica,
+            flg_urgente
          ) values (
             p_cod_abi,
             p_cod_ndg,
@@ -6510,7 +6518,8 @@ begin
             p_cod_stato_raccolta_doc,
             sysdate,
             sysdate,
-            p_cod_matr_pratica
+            p_cod_matr_pratica,
+            p_flg_urgente
          );
     else
        if(p_cod_matr_pratica != 'BATCH') then
@@ -6518,7 +6527,8 @@ begin
             update    t_mcres_app_raccolta_doc
             set cod_stato_raccolta_doc = p_cod_stato_raccolta_doc,
                 dta_upd = sysdate,
-                cod_matr_pratica = p_cod_matr_pratica
+                cod_matr_pratica = p_cod_matr_pratica,
+                flg_urgente = NVL(p_flg_urgente, flg_urgente)
             where COD_ABI = p_cod_abi
             and COD_NDG = p_cod_ndg
             and COD_UO_RAPPORTO = p_cod_uo_rapporto;
@@ -6851,16 +6861,123 @@ EXCEPTION
     return ko;
 end fnc_gestione_ftec_prodotti;
 
+function fnc_mcres_PIVA_CHK (
+    p_partita_iva varchar2 -- partita IVA da controllare
+) return number is -- restituisce codice errore
+
+ -- Controlla validitÃ?  della partita IVA italiana
+--
+-- Linguaggio: PL/SQL
+-- Argomento: B - partita IVA da validare
+-- Restituisce: NULL=argomento nullo, '0'=OK, '1'=lunghezza errata,
+--   '2'=simbolo non valido, '9'=errata somma di controllo
+
+
+    type num_varr_t is varray(32767) of number;
+    -- Contributo nel codice di controllo
+    C_PIVA_CHK constant num_varr_t := num_varr_t(0, 2, 4, 6, 8, 1, 3, 5, 7, 9);
+    L pls_integer; -- lunghezza stringa
+    C pls_integer; -- codice del carattere corrente
+    K pls_integer; -- codice normalizzato 0..9
+    S pls_integer := 0; -- codice di controllo
+begin
+    -- Controlla lunghezza
+    L := length(p_partita_iva);
+    if p_partita_iva is NULL or p_partita_iva = '00000000000' then
+        return ok; -- argomento nullo
+    elsif length(p_partita_iva) <> 11 then
+        return ko; -- lunghezza errata
+    end if;
+
+    -- Ciclo tra i caratteri della stringa
+    for I in 1 .. L loop
+        -- Estrae codice ASCII del prossimo carattere
+        C := ascii( substr(p_partita_iva, I, 1) );
+
+        -- Normalizza il codice al range 0..9
+        if C between 48 and 57 then -- caso: cifra
+            K := C - 48;
+        else -- caso: altri simboli
+            return ko; -- simbolo non valido
+        end if;
+
+        -- Calcola somma di controllo
+        if I mod 2 = 1 then
+            S := S + K;
+        else
+            S := S + C_PIVA_CHK(K+1);
+        end if;
+    end loop;
+
+    -- Controlla validitÃ?  della somma di controllo
+    if S mod 10 <> 0 then
+        return ko; -- controllo fallito
+    end if;
+    return ok; -- codice OK
+end;
+
+
+
+function  fnc_mcres_CF_CHK(
+    p_codice_fiscale varchar2 -- codice fiscale da controllare
+) return number is -- restituisce codice errore
+
+-- Controlla validitÃ  del codice fiscale italiano
+--
+-- Argomento: B - codice fiscale da validare
+-- Restituisce: NULL=argomento nullo, '0'=OK, '1'=lunghezza errata,
+--   '2'=simbolo non valido, '9'=errata somma di controllo
+--
+
+    type num_varr_t is varray(32767) of number;
+    -- tabella contributo delle posizioni dispari
+    C_CF_CHK constant num_varr_t := num_varr_t(1, 0, 5, 7, 9, 13, 15, 17, 19,
+        21, 2, 4, 18, 20, 11, 3, 6, 8, 12, 14, 16, 10, 22, 25, 24, 23);
+    L pls_integer; -- lunghezza stringa
+    C pls_integer; -- codice del carattere corrente
+    K pls_integer; -- codice normalizzato 0..25
+    KCIN pls_integer; -- codice di controllo normalizzato
+    S pls_integer := 0; -- codice di controllo
+begin
+    -- Controlla lunghezza
+    L := length(p_codice_fiscale);
+    if p_codice_fiscale is NULL then
+        return ok; -- argomento nullo
+    elsif length(p_codice_fiscale) <> 16 then
+        return ko; -- lunghezza errata
+    end if;
+
+    -- Ciclo tra i caratteri della stringa
+    for I in 1 .. L loop
+        -- Estrae codice ASCII del prossimo carattere
+        C := ascii( substr(p_codice_fiscale, I, 1) );
+
+        -- Normalizza il codice al range 0..25
+        if C between 48 and 57 then -- caso: cifra
+            K := C - 48;
+        elsif C between 65 and 90 then -- caso: carattere maiuscolo
+            K := C - 65;
+        else -- caso: altri simboli
+            return ko; -- simbolo non valido
+        end if;
+
+        -- Calcola somma di controllo
+        if I = L then
+            KCIN := K;
+        elsif I mod 2 = 0 then
+            S := S + K;
+        else
+            S := S + C_CF_CHK(K+1);
+        end if;
+    end loop;
+
+    -- Controlla validitÃ  della somma di controllo
+    if S mod 26 <> KCIN then
+        return ko; -- controllo fallito
+    end if;
+    return ok; -- codice OK
+end;
+
 
 end pkg_mcres_funzioni_portale;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCRES_FUNZIONI_PORTALE FOR MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCRES_FUNZIONI_PORTALE FOR MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE TO MCRE_USR;
-

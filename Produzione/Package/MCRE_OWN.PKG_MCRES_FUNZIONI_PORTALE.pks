@@ -112,6 +112,8 @@ AS
 	3.11  26/03/2014    V.Galli     to_date dta_solare_operazione in  fnc_insert_contropartita
     3.12 08/04/2014     V.Galli    flg_tipo_rapporto
 	3.13 05/05/2014     A.Pilloni  fix inserimento spese anche se annullate da mople
+	3.14 07/05/2014    A.Pilloni  aggiunta parametro flg_urgente in fnc_gestione_raccolta_doc
+    3.15 10/06/2014    V.Galli    flg_blocco_invio_sap
 ******************************************************************************/
 
 
@@ -299,7 +301,8 @@ FUNCTION fnc_mcres_ins_upd_spese
     L_VAL_ALIQUOTA_RITENUTA      IN NUMBER,
     L_VAL_PERC_RITENUTA          IN NUMBER,
     l_val_wbs                    in t_mcres_app_sp_spese.val_wbs%type default null,
-    v_controllo_fattura          out number
+    v_controllo_fattura          out number,
+    p_FLG_BLOCCO_INVIO_SAP t_mcres_app_sp_spese.FLG_BLOCCO_INVIO_SAP%type default null
   )
   RETURN VARCHAR2;
 
@@ -1012,7 +1015,8 @@ function fnc_movimento_proposto(
         p_cod_ndg t_mcres_app_raccolta_doc.cod_ndg%type,
         p_cod_uo_rapporto t_mcres_app_raccolta_doc.cod_uo_rapporto%type,
         p_cod_stato_raccolta_doc t_mcres_app_raccolta_doc.cod_stato_raccolta_doc%type,
-        p_cod_matr_pratica t_mcres_app_raccolta_doc.cod_matr_pratica%type
+        p_cod_matr_pratica t_mcres_app_raccolta_doc.cod_matr_pratica%type,
+        p_flg_urgente  t_mcres_app_raccolta_doc.flg_urgente%type
     ) return number;
 
     function fnc_gestione_scheda_doc(
@@ -1060,15 +1064,13 @@ function fnc_movimento_proposto(
         p_flg_active T_MCRES_cl_raccordo_prod.flg_active%type)
     return number ;
 
+	function  fnc_mcres_CF_CHK(
+		p_codice_fiscale varchar2 -- codice fiscale da controllare
+	) return number;
+
+	 function fnc_mcres_PIVA_CHK (
+		p_partita_iva varchar2 -- partita IVA da controllare
+	) return number;
+
 END PKG_MCRES_FUNZIONI_PORTALE;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCRES_FUNZIONI_PORTALE FOR MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCRES_FUNZIONI_PORTALE FOR MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_FUNZIONI_PORTALE TO MCRE_USR;
-
