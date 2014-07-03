@@ -36,9 +36,6 @@ CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_MCRES_ALIMENTAZIONE AS
   3.8       12/03/2014 A.Pilloni modifica per epc per aggiunta voce spese non imponibili
   3.9       13/03/2014 V.Galli gestione partizioni in copy_mcrd
   3.10     19/03/2014 V.Galli fun annullamneto del forfettarie
-  3.11    27/05/2014 A.Pilloni aggiunte funzioni reload alert 40 fnc_reload_alert_rapp_da_volt, 41 fnc_reload_alert_delibere_ft,
-             45 fnc_reload_alert_rapp_cmlt NB. (da richiamare come work around nel caso non funzionasse la chiamata in step elaborazione
-             di ALIMENTA_FEN del package alimentazione)
   ******************************************************************************/
 
     C_PACKAGE CONSTANT VARCHAR2(50) := 'PKG_MCRES_ALIMENTAZIONE';
@@ -92,24 +89,8 @@ CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_MCRES_ALIMENTAZIONE AS
 
     function fnc_annullamento_delibere( P_REC IN F_SLAVE_PAR_TYPE)return number;
 
-    function fnc_reload_alert_rapp_da_volt( P_REC IN F_SLAVE_PAR_TYPE)return number;
-
-    function fnc_reload_alert_delibere_ft( P_REC IN F_SLAVE_PAR_TYPE)return number;
-
-    function fnc_reload_alert_rapp_cmlt( P_REC IN F_SLAVE_PAR_TYPE)return number;
-
 --   function fnc_ges_raccolta_doc_step0 ( P_REC IN F_SLAVE_PAR_TYPE)return number;
 
 
 END PKG_MCRES_ALIMENTAZIONE;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_ALIMENTAZIONE TO MCRE_USR;
-

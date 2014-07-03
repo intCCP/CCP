@@ -724,7 +724,7 @@ BEGIN
   --******************T_MCRES_WRK_ANAGRAFICA_BILANCI************************************************
   begin
 
-    -- ID_DPER di cui fare lo spool. Massimo nel caso in cui presenti piÃ¹ ID_DPER
+    -- ID_DPER di cui fare lo spool. Massimo nel caso in cui presenti più ID_DPER
     select max(val_parameter)
     into v_last_bil
     from qzt_st_mis_param
@@ -737,7 +737,7 @@ BEGIN
         --Aggiornamento solo per i flussi di bilancio.
         --In questo ramo si entra anche durante il caricamento
         --dei flussi giornalieri ma non viene aggiornata alcuna riga
-        --in quanto la where condition non Ãš soddisfatta.
+        --in quanto la where condition non è soddisfatta.
         update t_mcres_wrk_anagrafica_bilanci
         set flg_to_spool = 1
         where cod_flusso || '_' || cod_abi = p_rec.nome_file;
@@ -1512,7 +1512,7 @@ begin
 
     execute immediate v_stmt;
 
-    v_note  :=  'controllo validitÃ  qry_fl';
+    v_note  :=  'controllo validità qry_fl';
 
 
     if length( v_qry_fl) <= 32767
@@ -1644,7 +1644,7 @@ begin
     end if;
 
 
-    v_note  :=  'controllo validitÃ  qry_st';
+    v_note  :=  'controllo validità qry_st';
 
     if length( v_qry_st) <= 32767
     then
@@ -1732,7 +1732,7 @@ begin
     from t_mcres_wrk_alimentazione
     where cod_flusso = v_cod_flusso;
 
-    v_note  :=  'controllo validitÃ  qry_app';
+    v_note  :=  'controllo validità qry_app';
 
     if length( v_qry_app) <= 32767
     then
@@ -2435,7 +2435,7 @@ begin
             and cod_ndg = rec_c.cod_ndg
             and cod_protocollo_delibera = rec_c.cod_protocollo_delibera;
             commit;
-            PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,V_NOTE);
+            PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_DEBUG,SQLCODE,SQLERRM,V_NOTE);
         end;
      end loop;
      return ok;
@@ -2444,7 +2444,6 @@ EXCEPTION
     PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,V_NOTE);
     return ko;
 end fnc_annullamento_delibere;
-
 
 --function fnc_ges_raccolta_doc_step0 (
 --    P_REC IN F_SLAVE_PAR_TYPE
@@ -2578,13 +2577,3 @@ end fnc_annullamento_delibere;
 
 end pkg_mcres_alimentazione;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_ALIMENTAZIONE TO MCRE_USR;
-

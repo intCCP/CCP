@@ -35,7 +35,7 @@ CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_MCRES_ALIMENTAZIONE AS
   3.7       24/02/2014 A.Pilloni modifica per epc impostazione aliquota dinamica
   3.8       12/03/2014 A.Pilloni modifica per epc per aggiunta voce spese non imponibili
   3.9       13/03/2014 V.Galli gestione partizioni in copy_mcrd
-  3.10     19/03/2014     V.Galli        fun annullamneto del forfettarie
+  3.10     19/03/2014 V.Galli fun annullamneto del forfettarie
   ******************************************************************************/
 
     C_PACKAGE CONSTANT VARCHAR2(50) := 'PKG_MCRES_ALIMENTAZIONE';
@@ -94,13 +94,3 @@ CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_MCRES_ALIMENTAZIONE AS
 
 END PKG_MCRES_ALIMENTAZIONE;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCRES_ALIMENTAZIONE FOR MCRE_OWN.PKG_MCRES_ALIMENTAZIONE;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCRES_ALIMENTAZIONE TO MCRE_USR;
-

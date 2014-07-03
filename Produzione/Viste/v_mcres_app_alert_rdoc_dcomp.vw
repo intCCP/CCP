@@ -1,4 +1,3 @@
-/* Formatted on 17/06/2014 18:09:33 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_ALERT_RDOC_DCOMP
 (
    ID_ALERT,
@@ -40,16 +39,16 @@ AS
              WHEN UO.FLG_URGENTE = 1
              THEN
                 'R'
-             WHEN ( (TRUNC (SYSDATE) - dta_passaggio_soff) BETWEEN 0
-                                                               AND ga.val_current_green)
+             WHEN ( (TRUNC (SYSDATE) - NVL (dta_cessione, dta_passaggio_soff)) BETWEEN 0
+                                                                                   AND ga.val_current_green)
              THEN
                 'V'
-             WHEN ( (TRUNC (SYSDATE) - dta_passaggio_soff) BETWEEN   ga.val_current_green
-                                                                   + 1
-                                                               AND ga.val_current_orange)
+             WHEN ( (TRUNC (SYSDATE) - NVL (dta_cessione, dta_passaggio_soff)) BETWEEN   ga.val_current_green
+                                                                                       + 1
+                                                                                   AND ga.val_current_orange)
              THEN
                 'A'
-             WHEN ( (TRUNC (SYSDATE) - dta_passaggio_soff) >
+             WHEN ( (TRUNC (SYSDATE) - NVL (dta_cessione, dta_passaggio_soff)) >
                       ga.val_current_orange)
              THEN
                 'R'
@@ -62,19 +61,24 @@ AS
                   p.cod_ndg,
                   z.cod_sndg,
                   p.cod_matr_pratica,
-                  dta_passaggio_soff,
+                  z.dta_passaggio_soff,
                   p.cod_pratica,
                   p.VAL_ANNO val_anno_pratica,
                   p.cod_uo_pratica,
                   z.cod_filiale_principale,
                   p.flg_gestione,
-                  1 cod_stato_raccolta_doc
-             FROM t_mcres_app_pratiche p, t_mcres_app_posizioni z
+                  1 cod_stato_raccolta_doc,
+                  ced.dta_cessione
+             FROM t_mcres_app_pratiche p,
+                  t_mcres_app_posizioni z,
+                  t_mcres_app_cedute_rout ced
             WHERE     0 = 0
                   AND p.flg_attiva = 1
                   AND z.flg_attiva = 1
                   AND p.cod_abi = z.cod_abi
                   AND p.cod_ndg = z.cod_ndg
+                  AND p.cod_abi = ced.cod_abi(+)
+                  AND p.cod_ndg = ced.cod_ndg(+)
                   AND z.dta_passaggio_soff BETWEEN (SELECT TO_DATE (
                                                               valore_costante,
                                                               'YYYYMMDD')
@@ -116,5 +120,3 @@ AS
           AND p.cod_abi = i.cod_abi
           AND uo.cod_Stato_Raccolta_doc IN (0, 1);
 
-
-GRANT SELECT ON MCRE_OWN.V_MCRES_APP_ALERT_RDOC_DCOMP TO MCRE_USR;
