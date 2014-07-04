@@ -132,6 +132,8 @@ CREATE OR REPLACE PACKAGE BODY MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
   8.7        20/01/2014       T.Bernardi          modifica di RIMUOVI MICROTIPOLOGIA,ANNULLA PACCHETTO per aggiunta campi delibere annullate
   8.8        21/03/2014       T.Bernardi          aggiunto campo cod_gruppo_super per estensione alle DR e modifica alla calcola_od con p_abi=p_abi_rif
   8.9        14/05/2014       M.Ceru               fix per variazione perimetro DR, aggiunto parametro p_abi_riferimento alla conferma_od
+  9.0        17/06/2014       M.Murro             aggiunto FLG_POSIZ_DA_CEDERE in Crea_Pacchetto_batch
+  9.1        27/06/2014       T.Bernardi          aggiunto p_doc_classif_mci a UPDATE_ID_DOCUMENTI,RETROCEDI_WF_PACCHETTO, ANNULLA_PACCHETTO
   */
   FUNCTION archivia_piano(p_proto_delibera     VARCHAR2,
                           p_cod_rapporto       VARCHAR2,
@@ -4988,8 +4990,9 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
   -- %PARAM P_PACC_CH_RISTR : Y SE ESISTE NEL PACCHETTO UNA DELIBERA B8, ALTRIMENTI N
   FUNCTION retrocedi_wf_pacchetto(p_prot_pacchetto IN VARCHAR2,
                                   p_cod_microtipol IN VARCHAR2,
-                                  p_utente         IN VARCHAR2 /*,
-                                                                                                                                                                                                                                                                          p_flg_ch_ristr   IN VARCHAR2 DEFAULT 'N'*/)
+                                  p_utente         IN VARCHAR2 ,
+                                  --p_flg_ch_ristr   IN VARCHAR2 DEFAULT 'N'
+                                  p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL)
     RETURN NUMBER AS
 
     c_nome CONSTANT VARCHAR2(100) := c_package || '.RETROCEDI_WF_PACCHETTO';
@@ -5049,7 +5052,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
              de.cod_organo_deliberante      = NULL,
              de.cod_organo_pacchetto        = NULL,
              de.dta_delibera                = NULL,
-             de.dta_delibera_rete           = NULL --06.28
+             de.dta_delibera_rete           = NULL, --06.28
+             DE.COD_DOC_CLASSIFICAZIONE_MCI = p_doc_classif_mci
        WHERE de.cod_protocollo_pacchetto = p_prot_pacchetto
          AND de.cod_microtipologia_delib = p_cod_microtipol
          AND de.cod_fase_delibera != 'AN'
@@ -5065,7 +5069,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
            SET de.dta_upd_fase_delibera       = SYSDATE,
                de.cod_fase_delibera           = 'IN',
                de.dta_upd_fase_microtipologia = SYSDATE,
-               de.cod_fase_microtipologia     = 'INS'
+               de.cod_fase_microtipologia     = 'INS',
+               DE.COD_DOC_CLASSIFICAZIONE_MCI = p_doc_classif_mci
          WHERE de.cod_protocollo_pacchetto = p_prot_pacchetto
            AND de.cod_microtipologia_delib = p_cod_microtipol
            AND de.cod_fase_delibera NOT IN ('AN')
@@ -5085,7 +5090,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                de.cod_organo_deliberante      = NULL,
                de.cod_organo_pacchetto        = NULL,
                de.dta_delibera                = NULL,
-               de.dta_delibera_rete           = NULL --06.28
+               de.dta_delibera_rete           = NULL, --06.28
+               DE.COD_DOC_CLASSIFICAZIONE_MCI = p_doc_classif_mci
          WHERE de.cod_protocollo_pacchetto = p_prot_pacchetto
            AND de.cod_fase_pacchetto NOT IN ('ANM', 'ANA');
 
@@ -5109,7 +5115,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                de.cod_organo_deliberante      = NULL,
                de.cod_organo_pacchetto        = NULL,
                de.dta_delibera                = NULL,
-               de.dta_delibera_rete           = NULL --06.28
+               de.dta_delibera_rete           = NULL, --06.28
+               DE.COD_DOC_CLASSIFICAZIONE_MCI = p_doc_classif_mci
          WHERE de.cod_protocollo_pacchetto = p_prot_pacchetto
            AND de.cod_fase_delibera != 'AN'
            AND de.cod_fase_microtipologia NOT IN ('ANA', 'ANM')
@@ -5459,7 +5466,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
   END associa_parere_ndg;
 
   FUNCTION ANNULLA_PACCHETTO(P_PROTO_PACCH IN T_MCREI_APP_DELIBERE. COD_PROTOCOLLO_PACCHETTO%TYPE,
-                             p_flg_tipo    VARCHAR2--,
+                             p_flg_tipo    VARCHAR2,
+                             p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL
                            --  P_DTA_ANNULLO IN T_MCREI_APP_DELIBERE.DTA_ANNULLO%TYPE DEFAULT SYSDATE,
                            --  P_COD_MATRICOLA_ANNULLO IN T_MCREI_APP_DELIBERE.COD_MATRICOLA_ANNULLO%TYPE DEFAULT NULL,
                            --  P_COD_OPERA_COME_ANNULLO IN T_MCREI_APP_DELIBERE.COD_OPERA_COME_ANNULLO%TYPE DEFAULT NULL,
@@ -5495,7 +5503,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
            d.cod_doc_classificazione     = NULL,
            d.cod_doc_delibera_banca      = NULL,
            D.COD_DOC_DELIBERA_CAPOGRUPPO = NULL,
-           d.cod_doc_parere_conformita   = NULL--,
+           d.cod_doc_parere_conformita   = NULL,
+           D.COD_DOC_CLASSIFICAZIONE_MCI = p_doc_classif_mci
            --d.COD_MATRICOLA_ANNULLO = P_COD_MATRICOLA_ANNULLO,
            --D.COD_OPERA_COME_ANNULLO = P_COD_OPERA_COME_ANNULLO,
            --D.DTA_ANNULLO = P_DTA_ANNULLO,
@@ -6181,7 +6190,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                                p_doc_parere_conform   t_mcrei_app_delibere. cod_doc_parere_conformita%TYPE,
                                p_doc_appendice_parere t_mcrei_app_delibere. cod_doc_appendice_parere%TYPE,
                                p_doc_delib_capogr     t_mcrei_app_delibere. cod_doc_delibera_capogruppo%TYPE,
-                               p_doc_classif          t_mcrei_app_delibere. cod_doc_classificazione%TYPE)
+                               p_doc_classif          t_mcrei_app_delibere. cod_doc_classificazione%TYPE,
+                               p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL)
     RETURN NUMBER IS
     c_nome CONSTANT VARCHAR2(100) := c_package || '.UPDATE_ID_DOCUMENTI';
     p_note t_mcrei_wrk_audit_applicativo.note%TYPE;
@@ -6198,6 +6208,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
            cod_doc_appendice_parere    = p_doc_appendice_parere,
            cod_doc_delibera_capogruppo = p_doc_delib_capogr,
            cod_doc_classificazione     = p_doc_classif,
+           cod_doc_classificazione_mci = p_doc_classif_mci,
            de.dta_last_upd_delibera    = SYSDATE
      WHERE de.cod_abi = p_abi
        AND de.cod_ndg = p_ndg
@@ -8943,6 +8954,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                                  p_anno_proposta     IN t_mcrei_app_delibere. val_anno_proposta%TYPE,
                                  p_progre_proposta   IN t_mcrei_app_delibere. val_progr_proposta%TYPE,
                                  p_uo                IN t_mcrei_app_delibere. cod_uo_proposta%TYPE,
+                                 p_pos_da_cedere     IN T_MCREI_APP_DELIBERE.FLG_POSIZ_DA_CEDERE%type,
                                  out_proto_delibera  OUT VARCHAR2,
                                  out_proto_pacchetto OUT VARCHAR2,
                                  out_esito           OUT NUMBER) ---1 OK, 0 KO
@@ -8960,8 +8972,8 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
     v_delibera_pre     t_mcrei_app_delibere.cod_protocollo_delibera_pre%TYPE;
     v_stralcio_ct      NUMBER := 0;
   BEGIN
-    p_note := 'CREA_PACCHETTO batch ' || p_cod_abi || ' ' || p_cod_ndg || ' ' ||
-              p_tipo_proposta;
+    p_note := 'CREA_PACCHETTO batch ' || p_cod_abi || ' * ' || p_cod_ndg || ' * ' ||
+              p_tipo_proposta || ' * ' || p_anno_proposta || ' * ' ||p_progre_proposta || ' * ' ||p_uo || ' * ' ||p_pos_da_cedere;
 
     IF p_cod_ndg IS NULL OR
        p_cod_abi IS NULL OR
@@ -9033,6 +9045,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
          cod_protocollo_delibera,
          cod_protocollo_delibera_pre,
          flg_attiva,
+         flg_posiz_da_cedere,--v9.0
          cod_microtipologia_delib,
          cod_fase_delibera,
          cod_fase_microtipologia,
@@ -9105,6 +9118,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                 lpad(p_progre_proposta, 11, '0'), --proto_Delibera
                 v_delibera_pre,
                 '1' AS flg_attiva,
+                p_pos_da_cedere, --v9.0
                 decode(p_tipo_proposta, 'E', 'CI', 'CS'),
                 --P_MICROTIPOLOG,
                 'IN',
@@ -9205,6 +9219,9 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
             AND decode(p_tipo_proposta, 'E', 'CI', 'CS') = TIP.COD_MICROTIPOLOGIA);
     EXCEPTION
       WHEN dup_val_on_index THEN
+ --     
+    --  dbms_output.put_line('Entro upd');
+   --   
         ---SE ESISTE GIA' UNA PROPOSTA AUTOMATICA NELLE DELIBERE, AGGIORNO IL RECORD
         UPDATE t_mcrei_app_delibere de
            SET (id_dper,
@@ -9216,6 +9233,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                 --cod_protocollo_delibera,
                 cod_protocollo_delibera_pre,
                 flg_attiva,
+                flg_posiz_da_cedere,--v9.0
                 cod_microtipologia_delib,
                 cod_fase_delibera,
                 cod_fase_microtipologia,
@@ -9283,6 +9301,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
                        --lpad (TO_CHAR(SYSDATE, 'YYYY'),6,'0')||lpad (p_progre_proposta,11,'0'),--proto_Delibera
                        v_delibera_pre,
                        '1' AS flg_attiva,
+                       p_pos_da_cedere,
                        decode(p_tipo_proposta, 'E', 'CI', 'CS'),
                        --P_MICROTIPOLOG,
                        'IN',
@@ -9396,7 +9415,7 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
      WHERE r.cod_abi = p_cod_abi
        AND r.cod_ndg = p_cod_ndg
        AND cod_matricola_inserente = 'BATCH'
-        AND COD_FASE_PACCHETTO NOT IN ('ANA','ANM')
+        AND COD_FASE_PACCHETTO = 'INS' --NOT IN ('ANA','ANM')
        AND flg_attiva = '1';
 
     pkg_mcrei_audit.log_app(c_nome,
@@ -12243,13 +12262,3 @@ INSERT INTO mcre_own.t_mcrei_bkp_delib_rimosse (ID_DPER,
 
 END PKG_MCREI_WEB_UTILITIES;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCREI_WEB_UTILITIES FOR MCRE_OWN.PKG_MCREI_WEB_UTILITIES;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCREI_WEB_UTILITIES FOR MCRE_OWN.PKG_MCREI_WEB_UTILITIES;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCREI_WEB_UTILITIES TO MCRE_USR;
-

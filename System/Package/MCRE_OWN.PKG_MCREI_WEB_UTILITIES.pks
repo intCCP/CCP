@@ -130,8 +130,10 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
     8.5        11/12/2013       M.Murro             fix cambia-fase_delibera per scadenza incaglio
     8.6        20/12/2013       M.Murro/M.Ceru      popolamento campo desc_no_delibera nella crea_pacchetto e aggiungi_microtipologia
     8.7        20/01/2014       T.Bernardi          modifica di RIMUOVI MICROTIPOLOGIA,ANNULLA PACCHETTO per aggiunta campi delibere annullate
-   8.8        21/03/2014       T.Bernardi          aggiunto campo cod_gruppo_super per estensione alle DR e modifica alla calcola_od con p_abi=p_abi_rif
-   8.9        14/05/2014       M.Ceru               fix per variazione perimetro DR, aggiunto parametro p_abi_riferimento alla conferma_od
+    8.8        21/03/2014       T.Bernardi          aggiunto campo cod_gruppo_super per estensione alle DR e modifica alla calcola_od con p_abi=p_abi_rif
+    8.9        14/05/2014       M.Ceru              fix per variazione perimetro DR, aggiunto parametro p_abi_riferimento alla conferma_od
+    9.0        17/06/2014       M.Murro             aggiunto FLG_POSIZ_DA_CEDERE in Crea_Pacchetto_batch
+    9.1        27/06/2014       T.Bernardi          aggiunto p_doc_classif_mci a UPDATE_ID_DOCUMENTI,RETROCEDI_WF_PACCHETTO, ANNULLA_PACCHETTO 
 */
   /**********************************************************************************/
   /*                                COSTANTI                                        */
@@ -627,8 +629,9 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
   -- %PARAM P_PACC_CH_RISTR : Y SE ESISTE NEL PACCHETTO UNA DELIBERA B8, ALTRIMENTI N
   FUNCTION retrocedi_wf_pacchetto(p_prot_pacchetto IN VARCHAR2,
                                   p_cod_microtipol IN VARCHAR2,
-                                  p_utente         IN VARCHAR2 /*,
-                                                                                                                                                                          P_FLG_CH_RISTR  IN VARCHAR2 DEFAULT 'N'*/)
+                                  p_utente         IN VARCHAR2,
+                                 -- P_FLG_CH_RISTR  IN VARCHAR2 DEFAULT 'N'
+                                 p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL)
     RETURN NUMBER;
 
   -- %author Reply
@@ -739,7 +742,8 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
   --Gestione Delibere (Genera Parere)
 
   FUNCTION ANNULLA_PACCHETTO(P_PROTO_PACCH IN T_MCREI_APP_DELIBERE.COD_PROTOCOLLO_PACCHETTO%TYPE,
-                             P_FLG_TIPO    VARCHAR2--,
+                             P_FLG_TIPO    VARCHAR2,--,
+                             p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL
                             -- P_DTA_ANNULLO IN T_MCREI_APP_DELIBERE.DTA_ANNULLO%TYPE DEFAULT SYSDATE,
                             -- P_COD_MATRICOLA_ANNULLO IN T_MCREI_APP_DELIBERE.COD_MATRICOLA_ANNULLO%TYPE DEFAULT NULL,
                             -- P_COD_OPERA_COME_ANNULLO IN T_MCREI_APP_DELIBERE.COD_OPERA_COME_ANNULLO%TYPE DEFAULT NULL,
@@ -863,7 +867,9 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
                                p_doc_parere_conform   t_mcrei_app_delibere.cod_doc_parere_conformita%TYPE,
                                p_doc_appendice_parere t_mcrei_app_delibere.cod_doc_appendice_parere%TYPE,
                                p_doc_delib_capogr     t_mcrei_app_delibere.cod_doc_delibera_capogruppo%TYPE,
-                               p_doc_classif          t_mcrei_app_delibere.cod_doc_classificazione%TYPE)
+                               p_doc_classif          t_mcrei_app_delibere.cod_doc_classificazione%TYPE,
+                               p_doc_classif_mci      t_mcrei_app_delibere.cod_doc_classificazione_mci%TYPE DEFAULT NULL
+                               )
     RETURN NUMBER;
 
   -- %author
@@ -1142,6 +1148,7 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
                                  p_anno_proposta     IN t_mcrei_app_delibere.val_anno_proposta%TYPE,
                                  p_progre_proposta   IN t_mcrei_app_delibere.val_progr_proposta%TYPE,
                                  p_uo                IN t_mcrei_app_delibere.cod_uo_proposta%TYPE,
+                                 p_pos_da_cedere     IN T_MCREI_APP_DELIBERE.FLG_POSIZ_DA_CEDERE%type,
                                  out_proto_delibera  OUT VARCHAR2,
                                  out_proto_pacchetto OUT VARCHAR2,
                                  out_esito           OUT NUMBER);
@@ -1541,13 +1548,3 @@ CREATE OR REPLACE PACKAGE MCRE_OWN."PKG_MCREI_WEB_UTILITIES" IS
 
 END PKG_MCREI_WEB_UTILITIES;
 /
-
-
-CREATE SYNONYM MCRE_APP.PKG_MCREI_WEB_UTILITIES FOR MCRE_OWN.PKG_MCREI_WEB_UTILITIES;
-
-
-CREATE SYNONYM MCRE_USR.PKG_MCREI_WEB_UTILITIES FOR MCRE_OWN.PKG_MCREI_WEB_UTILITIES;
-
-
-GRANT EXECUTE, DEBUG ON MCRE_OWN.PKG_MCREI_WEB_UTILITIES TO MCRE_USR;
-
