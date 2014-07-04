@@ -36,6 +36,7 @@ CREATE OR REPLACE PACKAGE MCRE_OWN.PKG_MCRES_ALIMENTAZIONE AS
   3.8       12/03/2014 A.Pilloni modifica per epc per aggiunta voce spese non imponibili
   3.9       13/03/2014 V.Galli gestione partizioni in copy_mcrd
   3.10     19/03/2014 V.Galli fun annullamneto del forfettarie
+  3.11     25/06/2014  A.pilloni Alimenta_st se qry_convert nulla allora 2 bind_var in execute qry_st
   ******************************************************************************/
 
     C_PACKAGE CONSTANT VARCHAR2(50) := 'PKG_MCRES_ALIMENTAZIONE';

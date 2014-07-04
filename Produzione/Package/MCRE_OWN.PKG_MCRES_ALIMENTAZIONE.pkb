@@ -37,6 +37,7 @@ AS
   3.8       12/03/2014 A.Pilloni modifica per epc per aggiunta voce spese non imponibili
   3.9       13/03/2014 V.Galli gestione partizioni in copy_mcrd
   3.10     19/03/2014     V.Galli        fun annullamneto del forfettarie
+  3.11     25/06/2014  A.pilloni Alimenta_st se qry_convert nulla allora 2 bind_var in execute qry_st
   ******************************************************************************/
 FUNCTION FNC_MCRES_ALIMENTA_FL(
     P_REC IN F_SLAVE_PAR_TYPE)
@@ -431,6 +432,8 @@ IS
   V_LOCK_RESULT NUMBER;
   V_LOCKHANDLE  VARCHAR2(200);
 
+   V_SEQ NUMBER := P_REC.SEQ_FLUSSO;
+
 BEGIN
 
   BEGIN
@@ -480,20 +483,6 @@ BEGIN
       PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,v_note);
   end;
 
-  BEGIN
-      V_NOTE:='Count dalla tabella vincoli';
-      EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' ||V_VAL_TAB_VINCOLI||' WHERE ID_FLUSSO = '||P_REC.SEQ_FLUSSO INTO V_COUNT;
-      COMMIT;
-      V_NOTE:='Aggiornamento tabella acquisizione';
-      UPDATE T_MCRES_WRK_ACQUISIZIONE
-      SET VAL_SCARTI_VINCOLI = v_count
-      WHERE ID_FLUSSO        = p_rec.SEQ_FLUSSO;
-      COMMIT;
-  EXCEPTION
-    WHEN OTHERS THEN
-      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,v_note);
-  end;
-
   --- LOCK_INIZIO
   DBMS_LOCK.ALLOCATE_UNIQUE(V_VAL_TAB_ST, V_LOCKHANDLE);
   V_LOCK_RESULT := DBMS_LOCK.REQUEST(V_LOCKHANDLE, DBMS_LOCK.X_MODE);
@@ -517,6 +506,7 @@ BEGIN
   IF (V_ESITO = 1) THEN
     --V_ESITO := PKG_MCRES_GESTIONE_PARTIZIONI.FNC_TRUNCATE_SUBPARTITION(V_VAL_TAB_ST,TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||'_'||V_COD_ABI,P_REC.SEQ_FLUSSO);
     V_NOTE := ' DELETE periodo='||TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||' - ABI='|| V_COD_ABI;
+
     EXECUTE immediate ' DELETE '||V_VAL_TAB_ST||' WHERE id_dper = '||TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||' AND COD_ABI='''|| V_COD_ABI ||'''';
     COMMIT;
     V_NOTE := 'Eseguita truncate subpartition '||TO_CHAR(P_REC.PERIODO,'YYYYMMDD')||'_'||V_COD_ABI||' con esito: '||V_ESITO;
@@ -526,11 +516,35 @@ BEGIN
 
     v_note := 'Query storico';
 
+    --3.11 AP
+    if v_val_qry_vincoli is null
+    then
+
+    EXECUTE immediate V_VAL_QRY_ST USING V_SEQ, TO_CHAR(P_REC.PERIODO,'YYYYMMDD'), V_COD_ABI;
+
+    else
+
     EXECUTE immediate V_VAL_QRY_ST USING TO_CHAR(P_REC.PERIODO,'YYYYMMDD'), V_COD_ABI;
 
-    COMMIT;
+    end if;
+
+     COMMIT;
 
   END IF;
+
+   BEGIN
+      V_NOTE:='Count dalla tabella vincoli';
+      EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' ||V_VAL_TAB_VINCOLI||' WHERE ID_FLUSSO = '||P_REC.SEQ_FLUSSO INTO V_COUNT;
+      COMMIT;
+      V_NOTE:='Aggiornamento tabella acquisizione';
+      UPDATE T_MCRES_WRK_ACQUISIZIONE
+      SET VAL_SCARTI_VINCOLI = v_count
+      WHERE ID_FLUSSO        = p_rec.SEQ_FLUSSO;
+      COMMIT;
+  EXCEPTION
+    WHEN OTHERS THEN
+      PKG_MCRES_AUDIT.LOG_CARICAMENTI(P_REC.SEQ_FLUSSO,C_NOME,PKG_MCRES_AUDIT.C_ERROR,SQLCODE,SQLERRM,v_note);
+  end;
 
    --- LOCK_INIZIO
   V_LOCK_RESULT := DBMS_LOCK.RELEASE(V_LOCKHANDLE);
