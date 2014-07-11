@@ -1,0 +1,12 @@
+create or replace view V_MCRE0_LIV_CRIT as
+select 
+  ID_DPER,
+  COD_ABI,
+  COD_NDG,
+  FL_SEMAFORO,
+  NOTE,
+  to_date (DTA_TIMESTAMP,'DD/MM/YYYY HH24.MI.SS') as DTA_TIMESTAMP,
+  MATR_AGG
+  from mcre_own.TE_MCRE0_LIV_CRIT;
+  
+  GRANT SELECT ON MCRE_OWN.V_MCRE0_LIV_CRIT TO MCRE_USR;
