@@ -1,1 +1,0 @@
-alter table t_mcrei_app_delibere add COD_DOC_CLASSIFICAZIONE_MCI VARCHAR2(36 BYTE);
