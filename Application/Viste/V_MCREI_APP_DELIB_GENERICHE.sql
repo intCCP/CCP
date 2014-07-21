@@ -1,6 +1,52 @@
-
-  CREATE OR REPLACE FORCE VIEW "MCRE_OWN"."V_MCREI_APP_DELIB_GENERICHE" ("COD_SNDG", "COD_PROTOCOLLO_PACCHETTO", "COD_ABI", "COD_ABI_CARTOLARIZZATO", "DESC_ISTITUTO", "COD_NDG", "COD_PROTOCOLLO_DELIBERA", "COD_PROTOCOLLO_DELIBERA_MOPLE", "FLG_NO_DELIBERA", "COD_MICROTIPOLOGIA_DELIB", "COD_MACROTIPOLOGIA_DELIB", "DESC_MICROTIPOLOGIA", "DESC_MACROTIPOLOGIA", "COD_FASE_DELIBERA", "COD_FASE_MICROTIPOLOGIA", "COD_FASE_PACCHETTO", "COD_STATO", "DTA_DECORRENZA_STATO", "DTA_SCADENZA_STATO", "VAL_ACC_CASSA", "VAL_ACC_FIRMA", "VAL_ACC_DERIVATI", "VAL_ACC_TOTALE", "VAL_UTIL_CASSA", "VAL_UTIL_FIRMA", "VAL_UTIL_DERIVATI", "VAL_UTIL_TOTALE", "VAL_UTIL_CAPITALE", "VAL_UTIL_MORA", "VAL_DEL_RETTIFICA", "VAL_DEL_RINUNCIA", "VAL_PROP_RINUNCIA", "VAL_TOT_RINUNCIA", "DESC_NOTE", "ORDINAMENTO", "COD_DOC_DELIBERA_BANCA", "COD_DOC_PARERE_CONFORMITA", "COD_DOC_APPENDICE_PARERE", "COD_DOC_DELIBERA_CAPOGRUPPO", "COD_DOC_CLASSIFICAZIONE", "FLG_RISTRUTTURATO", "DESC_NO_DELIBERA","COD_DOC_CLASSIFICAZIONE_MCI") AS 
-  SELECT                                --0221 introdotta nuova pcr_rapp_aggr
+/* Formatted on 21/07/2014 18:39:33 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_DELIB_GENERICHE
+(
+   COD_SNDG,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_ABI,
+   COD_ABI_CARTOLARIZZATO,
+   DESC_ISTITUTO,
+   COD_NDG,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_PROTOCOLLO_DELIBERA_MOPLE,
+   FLG_NO_DELIBERA,
+   COD_MICROTIPOLOGIA_DELIB,
+   COD_MACROTIPOLOGIA_DELIB,
+   DESC_MICROTIPOLOGIA,
+   DESC_MACROTIPOLOGIA,
+   COD_FASE_DELIBERA,
+   COD_FASE_MICROTIPOLOGIA,
+   COD_FASE_PACCHETTO,
+   COD_STATO,
+   DTA_DECORRENZA_STATO,
+   DTA_SCADENZA_STATO,
+   VAL_ACC_CASSA,
+   VAL_ACC_FIRMA,
+   VAL_ACC_DERIVATI,
+   VAL_ACC_TOTALE,
+   VAL_UTIL_CASSA,
+   VAL_UTIL_FIRMA,
+   VAL_UTIL_DERIVATI,
+   VAL_UTIL_TOTALE,
+   VAL_UTIL_CAPITALE,
+   VAL_UTIL_MORA,
+   VAL_DEL_RETTIFICA,
+   VAL_DEL_RINUNCIA,
+   VAL_PROP_RINUNCIA,
+   VAL_TOT_RINUNCIA,
+   DESC_NOTE,
+   ORDINAMENTO,
+   COD_DOC_DELIBERA_BANCA,
+   COD_DOC_PARERE_CONFORMITA,
+   COD_DOC_APPENDICE_PARERE,
+   COD_DOC_DELIBERA_CAPOGRUPPO,
+   COD_DOC_CLASSIFICAZIONE,
+   FLG_RISTRUTTURATO,
+   DESC_NO_DELIBERA,
+   COD_DOC_CLASSIFICAZIONE_MCI
+)
+AS
+   SELECT                                --0221 introdotta nuova pcr_rapp_aggr
           --130424 aggiunte microtipologie di proroga                                                                           -- 0216 aggiunto filtro fase_del != 'AN'
           DISTINCT
           d.cod_sndg,
@@ -118,8 +164,8 @@
           d.cod_doc_delibera_capogruppo,
           d.cod_doc_classificazione,
           d.flg_ristrutturato,
-          d.desc_no_delibera,  --20131230
-          D.COD_DOC_CLASSIFICAZIONE_MCI --T.B. APERTURA MCI 25-06-14
+          d.desc_no_delibera,                                       --20131230
+          D.COD_DOC_CLASSIFICAZIONE_MCI           --T.B. APERTURA MCI 25-06-14
      FROM t_mcrei_app_delibere d,
           t_mcre0_app_all_data f,
           t_mcre0_app_comparti c,                                  --21 MAGGIO
@@ -128,7 +174,7 @@
                      OVER (PARTITION BY i.cod_abi_cartolarizzato, i.cod_ndg)
                      AS interessi_di_mora
              FROM t_mcre0_app_rate_daily i, t_mcrei_app_pcr_rapp_aggr r
-            WHERE r.cod_abi_cartolarizzato = i.cod_abi_cartolarizzato(+)
+            WHERE     r.cod_abi_cartolarizzato = i.cod_abi_cartolarizzato(+)
                   AND r.cod_ndg = i.cod_ndg(+)                           --5/3
                                               ) p,
           t_mcrei_cl_tipologie t1,
@@ -139,9 +185,9 @@
           --  AND d.cod_macrotipologia_delib = 'GE'
           AND d.cod_abi = p.cod_abi_cartolarizzato(+)
           AND d.cod_ndg = p.cod_ndg(+)
-          AND ( (D.COD_FASE_PACCHETTO NOT IN ('ANA', 'ANM')       --13Dicembre
-                 AND d.cod_fase_delibera NOT IN ('AN', 'VA')  )   --13Dicembre
-               OR d.flg_to_copy = '9')--07Gennaio2014: condizione per visualizzare le delibere annullate con flg_to_copi='9' 
+          AND (   (    D.COD_FASE_PACCHETTO NOT IN ('ANA', 'ANM') --13Dicembre
+                   AND d.cod_fase_delibera NOT IN ('AN', 'VA'))   --13Dicembre
+               OR d.flg_to_copy = '9') --07Gennaio2014: condizione per visualizzare le delibere annullate con flg_to_copi='9'
           AND NVL (f.cod_comparto_assegnato, f.cod_comparto_calcolato) =
                  c.cod_comparto(+)
           AND d.cod_microtipologia_delib = t1.cod_microtipologia(+)

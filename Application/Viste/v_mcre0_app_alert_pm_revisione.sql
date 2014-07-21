@@ -1,0 +1,120 @@
+/* Formatted on 21/07/2014 18:32:35 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_PM_REVISIONE
+(
+   ID_UTENTE,
+   ID_REFERENTE,
+   COD_COMPARTO,
+   COD_SNDG,
+   COD_NDG,
+   DESC_NOME_CONTROPARTE,
+   COD_GRUPPO_ECONOMICO,
+   DESC_GRUPPO_ECONOMICO,
+   COD_ABI_ISTITUTO,
+   COD_ABI_CARTOLARIZZATO,
+   DESC_ISTITUTO,
+   COD_PERCORSO,
+   COD_STRUTTURA_COMPETENTE_DC,
+   DESC_STRUTTURA_COMPETENTE_DC,
+   COD_STRUTTURA_COMPETENTE_RG,
+   DESC_STRUTTURA_COMPETENTE_RG,
+   COD_STRUTTURA_COMPETENTE_AR,
+   DESC_STRUTTURA_COMPETENTE_AR,
+   COD_STRUTTURA_COMPETENTE_FI,
+   DESC_STRUTTURA_COMPETENTE_FI,
+   COD_STRUTTURA_COMPETENTE,
+   DTA_DECORRENZA_STATO,
+   DTA_SCADENZA_STATO,
+   DTA_UTENTE_ASSEGNATO,
+   COD_PROCESSO,
+   DTA_VALIDAZIONE,
+   DTA_SCADENZA,
+   DTA_INS_ALERT,
+   VAL_ALERT,
+   VAL_ORDINE_COLORE,
+   ID_PIANO,
+   COD_MACROSTATO,
+   COD_COMPARTO_POSIZIONE,
+   COD_COMPARTO_UTENTE,
+   COD_RAMO_CALCOLATO,
+   COD_STATO,
+   NOME,
+   COGNOME,
+   VAL_UTI_TOT,
+   COD_STATO_PROV,
+   COD_PRIV,
+   FLG_GESTORE_ABILITATO
+)
+AS
+   SELECT a.ID_UTENTE,
+          a.ID_REFERENTE,
+          a.COD_COMPARTO,
+          a.COD_SNDG,
+          a.COD_NDG,
+          a.DESC_NOME_CONTROPARTE,
+          a.COD_GRUPPO_ECONOMICO,
+          a.DESC_GRUPPO_ECONOMICO,
+          a.COD_ABI_ISTITUTO,
+          a.COD_ABI_CARTOLARIZZATO,
+          a.DESC_ISTITUTO,
+          a.cod_percorso,
+          COD_STRUTTURA_COMPETENTE_DC,
+          DESC_STRUTTURA_COMPETENTE_DC,
+          a.COD_STRUTTURA_COMPETENTE_RG,
+          a.DESC_STRUTTURA_COMPETENTE_RG,
+          a.COD_STRUTTURA_COMPETENTE_AR,
+          a.DESC_STRUTTURA_COMPETENTE_AR,
+          a.COD_STRUTTURA_COMPETENTE_FI,
+          a.DESC_STRUTTURA_COMPETENTE_FI,
+          a.COD_STRUTTURA_COMPETENTE,
+          a.DTA_DECORRENZA_STATO,
+          a.DTA_SCADENZA_STATO,
+          a.DTA_UTENTE_ASSEGNATO,
+          a.COD_PROCESSO,
+          dta_validazione,
+          dta_scadenza,
+          /*case
+            when sysdate - decode(sign(dta_validazione-DTA_PRESA_VISIONE),-1,DTA_PRESA_VISIONE,dta_validazione) <= 25 then 'V'
+            when sysdate - decode(sign(dta_validazione-DTA_PRESA_VISIONE),-1,DTA_PRESA_VISIONE,dta_validazione) between 25 and 35 then 'A'
+            else 'R'
+          end */
+          DTA_INS_49 DTA_INS_ALERT,
+          ALERT_49 VAL_ALERT,
+          (SELECT DECODE (
+                     ALERT_49,
+                     'V', VAL_VERDE,
+                     DECODE (ALERT_49,
+                             'A', VAL_ARANCIO,
+                             DECODE (ALERT_49, 'R', VAL_ROSSO, NULL)))
+             FROM T_MCRE0_APP_ALERT
+            WHERE ID_ALERT = 49)
+             VAL_ORDINE_COLORE,
+          ID_PIANO,
+          COD_MACROSTATO,
+          cOD_COMPARTO cOD_COMPARTO_POSIZIONE,
+          COD_COMPARTO_UTENTE,
+          COD_RAMO_CALCOLATO,
+          COD_STATO,
+          NOME,
+          COGNOME,
+          SCSB_UTI_TOT VAL_UTI_TOT,
+          COD_STATO_PRECEDENTE COD_STATO_PROV,
+          COD_PRIV,
+          FLG_GESTORE_ABILITATO
+     FROM T_MCRE0_APP_ALERT_POS p,
+          V_MCRE0_APP_UPD_FIELDS a,
+          (SELECT DISTINCT COD_ABI_CARTOLARIZZATO,
+                           COD_NDG,
+                           ID_PIANO,
+                           DTA_scadenza dta_scadenza,
+                           DTA_PIANO_VALIDATO dta_validazione,
+                           DTA_PRESA_VISIONE_MODIFICA DTA_PRESA_VISIONE
+             FROM T_MCRE0_APP_GEST_PM
+            WHERE     NVL (FLG_PIANO_ANNULLATO, 'N') = 'N'
+                  AND ID_WORKFLOW NOT IN (30, 40)) b
+    WHERE     1 = 1
+          AND a.COD_ABI_CARTOLARIZZATO = b.COD_ABI_CARTOLARIZZATO
+          AND a.COD_NDG = b.COD_NDG
+          AND a.COD_ABI_CARTOLARIZZATO = p.COD_ABI_CARTOLARIZZATO
+          AND a.COD_NDG = p.COD_NDG
+          AND A.COD_STATO = 'PM'
+          AND ALERT_49 IS NOT NULL;

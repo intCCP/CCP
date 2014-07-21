@@ -1,0 +1,21 @@
+/* Formatted on 21/07/2014 18:31:25 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_DONOR_HAV
+(
+   DONOR_ID,
+   DONOR_NAME,
+   ADDRESS,
+   CITY,
+   REGION,
+   POSTAL_CODE
+)
+AS
+   SELECT DONOR_ID,
+          DONOR_NAME,
+          ADDRESS,
+          CITY,
+          REGION,
+          POSTAL_CODE
+     FROM donor d
+    --  group by DONOR_ID,DONOR_NAME, ADDRESS  ,
+    --CITY ,REGION, POSTAL_CODE
+    WHERE donor_id = 2;

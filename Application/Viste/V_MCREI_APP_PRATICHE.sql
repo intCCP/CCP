@@ -1,6 +1,105 @@
-CREATE OR REPLACE VIEW MCRE_OWN.V_MCREI_APP_PRATICHE
-AS 
-SELECT DISTINCT
+/* Formatted on 21/07/2014 18:40:39 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_PRATICHE
+(
+   COD_ABI,
+   COD_CAUSALE_CHIUSURA,
+   COD_MATR_PRATICA,
+   COD_NDG,
+   COD_OPERATORE_INS_UPD,
+   COD_PRATICA,
+   COD_SNDG,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_MICROTIPOLOGIA_DELIB,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_ORGANO_DELIBERANTE,
+   DESC_ORGANO_DELIBERANTE,
+   COD_ORGANO_CALCOLATO,
+   COD_ORGANO_PACCHETTO,
+   COD_ORGANO_PACCHETTO_CALC,
+   COD_STATO_GIUR,
+   COD_TIPO_GESTIONE,
+   COD_UO_PRATICA,
+   DTA_AFFID_UO,
+   DTA_APERTURA,
+   DTA_ASSEGN_ADDETTO,
+   DTA_CHIUSURA,
+   DTA_DECORRENZA_STATO,
+   DTA_FINE_GESTIONE,
+   DTA_FINE_GESTIONE_PRATICA,
+   FLG_PROROGA_IMPLICITA,
+   DTA_FINE_STATO,
+   DTA_INIZIO_GESTIONE,
+   DTA_INS,
+   DTA_INS_STATO_GIUR,
+   DTA_UPD,
+   FLG_ATTIVA,
+   ID_DPER,
+   VAL_ANNO_PRATICA,
+   PROG_PROPOSTA_CI,
+   ANNO_PROPOSTA_CI,
+   UO_PROPOSTA_CI,
+   DTA_LAST_UPD_DELIBERA,
+   DTA_MOTIVO_PASS_RISCHIO,
+   COD_FASE_DELIBERA,
+   DTA_DELIBERA,
+   DTA_SCADENZA_TRANSAZ,
+   DESC_NOTE,
+   COD_MATRICOLA_INSERENTE,
+   DTA_INIZIO_RAPPORTO_CLIENTE,
+   VAL_ACCORDATO,
+   VAL_ACCORDATO_CASSA,
+   VAL_ACCORDATO_DERIVATI,
+   VAL_ACCORDATO_FIRMA,
+   VAL_ESP_LORDA,
+   VAL_ESP_LORDA_CAPITALE,
+   VAL_ESP_LORDA_MORA,
+   VAL_ESP_NETTA_ANTE_DELIB,
+   VAL_ESP_NETTA_POST_DELIB,
+   VAL_ESP_TOT_CASSA,
+   VAL_IMP_CREDITI_FIRMA,
+   VAL_IMP_FONDI_TERZI,
+   VAL_IMP_FONDI_TERZI_NB,
+   VAL_IMP_OFFERTO,
+   VAL_IMP_PERDITA,
+   VAL_IMP_UTILIZZO,
+   VAL_INTERESSI_MORA_CASSA,
+   VAL_NUM_PROGR_DELIBERA,
+   VAL_PERC_DUBBIO_ESITO,
+   VAL_PERC_PERD_RM,
+   VAL_PERC_RDV,
+   VAL_PERC_RDV_ESTERO,
+   VAL_PERDITA_ATTUALE,
+   VAL_PERDITA_DELIBERATA,
+   VAL_PROGR_PROPOSTA,
+   VAL_RDV_DELIB_BANCA_RETE,
+   VAL_RDV_EXTRA_DELIBERA,
+   VAL_RDV_QC_ANTE_DELIB,
+   VAL_RDV_QC_DELIBERATA,
+   VAL_RDV_QC_PROGRESSIVA,
+   VAL_RDV_QC_PROGRESSIVA_ORIG,
+   VAL_RDV_QUOTA_MORA,
+   VAL_RINUNCIA_CAPITALE,
+   VAL_RINUNCIA_DELIBERATA,
+   VAL_RINUNCIA_MORA,
+   VAL_RINUNCIA_PROPOSTA,
+   VAL_RINUNCIA_TOTALE,
+   VAL_RISCHI_INDIRETTI,
+   VAL_SACRIF_CAPIT_MORA,
+   VAL_STRALCIO_QUOTA_CAP,
+   VAL_STRALCIO_QUOTA_MORA,
+   VAL_STRALCIO_SENZA_ACCANTONAM,
+   VAL_TASSO_BASE_APPL,
+   VAL_UTI_CASSA_SCSB,
+   VAL_UTI_FIRMA_SCSB,
+   VAL_UTI_NETTO_FONDO_TERZI,
+   VAL_UTI_SOSTI_SCSB,
+   VAL_UTI_TOT_GEGB,
+   VAL_UTI_TOT_SCGB,
+   VAL_UTI_TOT_SCSB,
+   DESC_RAMO_AFFARI
+)
+AS
+   SELECT DISTINCT
           p."COD_ABI",                                                   --5/3
           p."COD_CAUSALE_CHIUSURA",
           p."COD_MATR_PRATICA",
@@ -33,8 +132,30 @@ SELECT DISTINCT
              AS dta_decorrenza_stato,
           CASE
              WHEN d."COD_MICROTIPOLOGIA_DELIB" IN
-                     ('RV', 'T4', 'A0', 'IM', 'IF',
-                     'ST','T2','T3','T5','P3','A2','A3','A4','A5','A6','A8','B0','B1','B2','B3','B4','B5','B9','D0')-- TB aggiunte per ticket 28428389
+                     ('RV',
+                      'T4',
+                      'A0',
+                      'IM',
+                      'IF',
+                      'ST',
+                      'T2',
+                      'T3',
+                      'T5',
+                      'P3',
+                      'A2',
+                      'A3',
+                      'A4',
+                      'A5',
+                      'A6',
+                      'A8',
+                      'B0',
+                      'B1',
+                      'B2',
+                      'B3',
+                      'B4',
+                      'B5',
+                      'B9',
+                      'D0')                 -- TB aggiunte per ticket 28428389
              THEN                  --leggo direttamente dallo stato --MM131115
                 X.DTA_SCADENZA_STATO
              ELSE
@@ -42,7 +163,7 @@ SELECT DISTINCT
           END
              AS DTA_FINE_GESTIONE,
           p."DTA_FINE_GESTIONE" AS DTA_FINE_GESTIONE_PRATICA, --ex DTA_FINE_GESTIONE
-          --x le rdv dico se ho fatto proroga implicita --non serve pi?, ma rimane
+          --x le rdv dico se ho fatto proroga implicita --non serve più, ma rimane
           CASE
              WHEN d."COD_MICROTIPOLOGIA_DELIB" IN
                      ('RV', 'T4', 'A0', 'IM', 'IF')
@@ -186,9 +307,9 @@ SELECT DISTINCT
                   A.COD_PROTOCOLLO_DELIBERA,
                   MAX (
                      TO_NUMBER (
-                        VAL_ANNO_PROPOSTA
+                           VAL_ANNO_PROPOSTA
                         || LPAD (VAL_PROGR_PROPOSTA, 11, '0')))
-                  -- 15FEB: ESTRAGGO ULTIMA CLASSIFICAZIONE SE CE NE SONO PI? DI UNA CAUSA IMPIANTO
+                  -- 15FEB: ESTRAGGO ULTIMA CLASSIFICAZIONE SE CE NE SONO PIù DI UNA CAUSA IMPIANTO
                   OVER (
                      PARTITION BY cod_abi,
                                   cod_ndg,
@@ -231,4 +352,4 @@ SELECT DISTINCT
           AND d.cod_organo_deliberante = o1.cod_organo_deliberante(+)
           --11 maggio
           AND d.cod_abi = o1.cod_abi_istituto(+)
-          AND o1.cod_stato_riferimento(+) = 'IN'
+          AND o1.cod_stato_riferimento(+) = 'IN';

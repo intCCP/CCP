@@ -1,3 +1,4 @@
+/* Formatted on 21/07/2014 18:35:59 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_SCHEDA_ANAG
 (
    COD_ABI_CARTOLARIZZATO,
@@ -108,7 +109,7 @@ AS
                         --0320 scadenza prorogo distinta per direzione o altro
              --0828 scadenza Incaglio come per regioni (non scadenza servizio)
                                               --0904 dati di ris se non chiusa
-                               --unit√† organizzativa , addetto, stato attuale.
+                               --unit‡ organizzativa , addetto, stato attuale.
  --T.B.: modifica data_decorrenza_Stato : messo flg_target = 'Y' all'ultima when
  --M.C: 06/05/2014 modificata per risoluzione riga doppia, sulla tabella t_mcres_app_parti_corr.
          f.cod_abi_cartolarizzato,
@@ -440,28 +441,28 @@ AS
             FROM t_mcre0_app_istituti_all a
            WHERE a.cod_abi = f.COD_ABI_CARTOLARIZZATO)
             AS FLG_OUTSOURCING_ABI,
-            CASE
-				WHEN F.COD_STATO in ('GF','PB')
-                THEN
-					( SELECT cr.FL_SEMAFORO
-					  FROM T_MCRE0_DAY_LIV_CRIT cr
-					  WHERE CR.COD_ABI = f.cod_abi_cartolarizzato 
-					    AND CR.COD_NDG = f.cod_ndg )
-				ELSE
-					NULL
-			END
+         CASE
+            WHEN F.COD_STATO IN ('GF', 'PB')
+            THEN
+               (SELECT cr.FL_SEMAFORO
+                  FROM T_MCRE0_DAY_LIV_CRIT cr
+                 WHERE     CR.COD_ABI = f.cod_abi_cartolarizzato
+                       AND CR.COD_NDG = f.cod_ndg)
+            ELSE
+               NULL
+         END
             FLG_LIV_CRIT,
-			CASE
-				WHEN F.COD_STATO in ('GF','PB')
-				THEN			
-					( SELECT cr.note
-					  FROM T_MCRE0_DAY_LIV_CRIT cr
-					  WHERE CR.COD_ABI = f.cod_abi_cartolarizzato 
-					    AND CR.COD_NDG = f.cod_ndg )
-				ELSE
-					NULL
-			END		   
-            AS DESC_NOTE_LIV_CRIT	
+         CASE
+            WHEN F.COD_STATO IN ('GF', 'PB')
+            THEN
+               (SELECT cr.note
+                  FROM T_MCRE0_DAY_LIV_CRIT cr
+                 WHERE     CR.COD_ABI = f.cod_abi_cartolarizzato
+                       AND CR.COD_NDG = f.cod_ndg)
+            ELSE
+               NULL
+         END
+            AS DESC_NOTE_LIV_CRIT
     FROM v_mcre0_app_upd_fields_all f,
          t_mcre0_app_anagrafica_gruppo a,
          t_mcre0_app_gruppo_economico ge,
@@ -530,5 +531,4 @@ AS
          AND f.cod_ndg = ris.cod_ndg(+)
          -- 09/01/2014 dismissione T_MCREI_APP_PARTI_CORRELATE x leggere info da T_MCRES_APP_PARTI_CORR
          AND f.cod_abi_istituto = pc_new.cod_abi(+)
-         AND f.cod_sndg = pc_new.cod_sndg_sogg_connesso(+);	 
-		 
+         AND f.cod_sndg = pc_new.cod_sndg_sogg_connesso(+);

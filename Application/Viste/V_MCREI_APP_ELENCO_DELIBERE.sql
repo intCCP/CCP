@@ -1,6 +1,75 @@
-
-  CREATE OR REPLACE FORCE VIEW "MCRE_OWN"."V_MCREI_APP_ELENCO_DELIBERE" ("FLG_LAST_RDV_CONFERMATA", "DATA_INS_CONF_DELIBERA", "COD_PROTOCOLLO_DELIBERA", "COD_PROTOCOLLO_DELIBERA_MOPLE", "COD_MACROTIPOLOGIA_DELIB", "DESC_MACROTIPOLOGIA", "COD_MICROTIPOLOGIA_DELIB", "DESC_MICROTIPOLOGIA", "COD_FASE_DELIBERA", "DESC_FASE_DELIBERA", "DTA_DELIBERA", "DTA_CREAZIONE_PACCHETTO", "DTA_CONFERMA_PACCHETTO", "TIPO_PACCHETTO", "COD_FASE_PACCHETTO", "LABEL_STATO_PACCHETTO", "DTA_MODIFICA_STATO", "COD_ORGANO_DELIBERANTE", "COD_ORGANO_CALCOLATO", "COD_ORGANO_PACCHETTO_DELIB", "COD_ORGANO_PACCHETTO_CALCOLATO", "DESC_ORGANO_DELIBERANTE", "DESC_ORGANO_CALCOLATO", "DESC_ORGANO_PACCHETTO_DELIB", "DESC_ORGANO_PACCHETTO_CALC", "DTA_SCADENZA", "DTA_FINE_GESTIONE", "FLG_ART_136", "FLG_PARTI_CORRELATE", "COD_SNDG", "COD_ABI", "DESC_ISTITUTO", "COD_STATO", "DESC_MICROSTATO", "DESC_MACROSTATO", "DTA_DECORRENZA_STATO", "COD_PROCESSO", "COD_NDG", "COD_PROTOCOLLO_PACCHETTO", "COD_PRATICA", "VAL_ANNO_PRATICA", "COD_COMPARTO", "ID_UTENTE", "ID_REFERENTE", "COD_TIPO_PACCHETTO", "DESC_TIPO_PACCHETTO", "DESC_FASE_PACCHETTO", "FLG_NO_DELIBERA", "COD_DOC_DELIBERA_BANCA", "COD_DOC_PARERE_CONFORMITA", "COD_DOC_APPENDICE_PARERE", "COD_DOC_DELIBERA_CAPOGRUPPO", "COD_DOC_CLASSIFICAZIONE", "ORDINAMENTO", "COD_STATO_PRECEDENTE", "DTA_DEC_STATO_MOPLE", "DTA_DECORRENZA_STATO_PRE", "COD_PERCORSO", "FLG_RISTRUTTURATO", "COD_GRUPPO_SUPER", "DESC_NOTE_DELIBERE_ANNULLATE", "VAL_RDV_QC_ANTE_DELIB", "VAL_RDV_QC_DELIBERATA", "VAL_RDV_QC_PROGRESSIVA", "DESC_NO_DELIBERA","COD_DOC_CLASSIFICAZIONE_MCI") AS 
-  SELECT                                                  /*no_parallel (f)*/
+/* Formatted on 21/07/2014 18:40:14 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_ELENCO_DELIBERE
+(
+   FLG_LAST_RDV_CONFERMATA,
+   DATA_INS_CONF_DELIBERA,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_PROTOCOLLO_DELIBERA_MOPLE,
+   COD_MACROTIPOLOGIA_DELIB,
+   DESC_MACROTIPOLOGIA,
+   COD_MICROTIPOLOGIA_DELIB,
+   DESC_MICROTIPOLOGIA,
+   COD_FASE_DELIBERA,
+   DESC_FASE_DELIBERA,
+   DTA_DELIBERA,
+   DTA_CREAZIONE_PACCHETTO,
+   DTA_CONFERMA_PACCHETTO,
+   TIPO_PACCHETTO,
+   COD_FASE_PACCHETTO,
+   LABEL_STATO_PACCHETTO,
+   DTA_MODIFICA_STATO,
+   COD_ORGANO_DELIBERANTE,
+   COD_ORGANO_CALCOLATO,
+   COD_ORGANO_PACCHETTO_DELIB,
+   COD_ORGANO_PACCHETTO_CALCOLATO,
+   DESC_ORGANO_DELIBERANTE,
+   DESC_ORGANO_CALCOLATO,
+   DESC_ORGANO_PACCHETTO_DELIB,
+   DESC_ORGANO_PACCHETTO_CALC,
+   DTA_SCADENZA,
+   DTA_FINE_GESTIONE,
+   FLG_ART_136,
+   FLG_PARTI_CORRELATE,
+   COD_SNDG,
+   COD_ABI,
+   DESC_ISTITUTO,
+   COD_STATO,
+   DESC_MICROSTATO,
+   DESC_MACROSTATO,
+   DTA_DECORRENZA_STATO,
+   COD_PROCESSO,
+   COD_NDG,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_PRATICA,
+   VAL_ANNO_PRATICA,
+   COD_COMPARTO,
+   ID_UTENTE,
+   ID_REFERENTE,
+   COD_TIPO_PACCHETTO,
+   DESC_TIPO_PACCHETTO,
+   DESC_FASE_PACCHETTO,
+   FLG_NO_DELIBERA,
+   COD_DOC_DELIBERA_BANCA,
+   COD_DOC_PARERE_CONFORMITA,
+   COD_DOC_APPENDICE_PARERE,
+   COD_DOC_DELIBERA_CAPOGRUPPO,
+   COD_DOC_CLASSIFICAZIONE,
+   ORDINAMENTO,
+   COD_STATO_PRECEDENTE,
+   DTA_DEC_STATO_MOPLE,
+   DTA_DECORRENZA_STATO_PRE,
+   COD_PERCORSO,
+   FLG_RISTRUTTURATO,
+   COD_GRUPPO_SUPER,
+   DESC_NOTE_DELIBERE_ANNULLATE,
+   VAL_RDV_QC_ANTE_DELIB,
+   VAL_RDV_QC_DELIBERATA,
+   VAL_RDV_QC_PROGRESSIVA,
+   DESC_NO_DELIBERA,
+   COD_DOC_CLASSIFICAZIONE_MCI
+)
+AS
+   SELECT                                                  /*no_parallel (f)*/
           --111115 MM:aggiunto comparto/utente
           --111121 MM: join con abi_.cartolarizzato!
           --120123 MM, doppio campo protocollo delibera
@@ -16,17 +85,22 @@
              'A',                                                   --5 LUGLIO
                   (CASE
                       ---FLG CHE ABILITA GESTIONE VALUTAZIONI SOLO SULL'ULTIMA RV CONFERMATA PER SNDG
-                      WHEN (dta_last_upd_delibera =
-                               (SELECT MAX (dta_last_upd_delibera)
-                                  FROM t_mcrei_app_delibere r
-                                 WHERE r.cod_abi = d.cod_abi
-                                       AND r.cod_ndg = d.cod_ndg
-                                       AND r.cod_microtipologia_delib IN
-                                              ('RV', 'T4', 'A0', 'IM', 'IF')
-                                       AND r.cod_fase_delibera = 'CO'
-                                       AND r.flg_no_delibera = 0
-                                       ---24 LUGLIO
-                                       AND dta_conferma_delibera IS NOT NULL)
+                      WHEN (    dta_last_upd_delibera =
+                                   (SELECT MAX (dta_last_upd_delibera)
+                                      FROM t_mcrei_app_delibere r
+                                     WHERE     r.cod_abi = d.cod_abi
+                                           AND r.cod_ndg = d.cod_ndg
+                                           AND r.cod_microtipologia_delib IN
+                                                  ('RV',
+                                                   'T4',
+                                                   'A0',
+                                                   'IM',
+                                                   'IF')
+                                           AND r.cod_fase_delibera = 'CO'
+                                           AND r.flg_no_delibera = 0
+                                           ---24 LUGLIO
+                                           AND dta_conferma_delibera
+                                                  IS NOT NULL)
                             /*AND cod_tipo_pacchetto in ('M','B','A')*/
                             AND val_num_progr_delibera =
                                    (SELECT MAX (val_num_progr_delibera)
@@ -35,12 +109,12 @@
                                            AND r.cod_ndg = d.cod_ndg
                                            AND r.cod_fase_delibera = 'CO'
                                            AND r.flg_no_delibera = 0
-                                           AND (r.cod_microtipologia_delib IN
-                                                   ('RV',
-                                                    'T4',
-                                                    'A0',
-                                                    'IM',
-                                                    'IF')
+                                           AND (   r.cod_microtipologia_delib IN
+                                                      ('RV',
+                                                       'T4',
+                                                       'A0',
+                                                       'IM',
+                                                       'IF')
                                                 OR cod_macrotipologia_delib =
                                                       'TP')        --26 LUGLIO
                                                            )) --0629 controllo spostato qui da web.modificabile
@@ -51,17 +125,17 @@
                    END),
              (CASE
                  ---FLG CHE ABILITA GESTIONE VALUTAZIONI SOLO SULL'ULTIMA RV CONFERMATA PER SNDG
-                 WHEN (dta_conferma_delibera =
-                          (SELECT MAX (dta_conferma_delibera)
-                             FROM t_mcrei_app_delibere r
-                            WHERE r.cod_abi = d.cod_abi
-                                  AND r.cod_ndg = d.cod_ndg
-                                  AND r.cod_microtipologia_delib IN
-                                         ('RV', 'T4', 'A0', 'IM', 'IF')
-                                  AND r.cod_fase_delibera = 'CO'
-                                  AND r.flg_no_delibera = 0
-                                  ----24 LUGLIO
-                                  AND dta_conferma_delibera IS NOT NULL)
+                 WHEN (    dta_conferma_delibera =
+                              (SELECT MAX (dta_conferma_delibera)
+                                 FROM t_mcrei_app_delibere r
+                                WHERE     r.cod_abi = d.cod_abi
+                                      AND r.cod_ndg = d.cod_ndg
+                                      AND r.cod_microtipologia_delib IN
+                                             ('RV', 'T4', 'A0', 'IM', 'IF')
+                                      AND r.cod_fase_delibera = 'CO'
+                                      AND r.flg_no_delibera = 0
+                                      ----24 LUGLIO
+                                      AND dta_conferma_delibera IS NOT NULL)
                        /*AND cod_tipo_pacchetto in ('M','B','A')*/
                        AND val_num_progr_delibera =
                               (SELECT MAX (val_num_progr_delibera)
@@ -91,32 +165,35 @@
           /* cod_protocollo_delibera in formato MOPLE PPPPPPPPAAAAUUUUU => UUUUU/AAAA/PPPPPPPP  P = Progressivo A = Anno U = UO*/
           --MM 15.02 uo letta da uo_proposta su delibera prima che dalla pratiche
           CASE
-             WHEN d.cod_microtipologia_delib IN ('CI', 'CS')
+             WHEN     d.cod_microtipologia_delib IN ('CI', 'CS')
                   AND d.cod_tipo_pacchetto = 'M'
              THEN
-                NVL (
-                   d.cod_uo_pratica,
-                   NVL (d.cod_uo_proposta, NVL (p.cod_uo_pratica, '00000')))
+                   NVL (
+                      d.cod_uo_pratica,
+                      NVL (d.cod_uo_proposta,
+                           NVL (p.cod_uo_pratica, '00000')))
                 || '/'
                 || SUBSTR (cod_protocollo_delibera, 1, 4)
                 || '/'
                 || SUBSTR (cod_protocollo_delibera, 10, 8)
-             WHEN d.cod_microtipologia_delib IN ('CI', 'CS')
+             WHEN     d.cod_microtipologia_delib IN ('CI', 'CS')
                   AND d.cod_tipo_pacchetto = 'A'
              THEN
-                NVL (
-                   d.cod_uo_pratica,
-                   NVL (d.cod_uo_proposta, NVL (p.cod_uo_pratica, '00000')))
+                   NVL (
+                      d.cod_uo_pratica,
+                      NVL (d.cod_uo_proposta,
+                           NVL (p.cod_uo_pratica, '00000')))
                 || '/'
                 || SUBSTR (cod_protocollo_delibera, 3, 4)
                 || '/'
                 || SUBSTR (cod_protocollo_delibera, 9, 9)
-             WHEN d.cod_microtipologia_delib IN ('CI', 'CS')          --30 AUG
+             WHEN     d.cod_microtipologia_delib IN ('CI', 'CS')      --30 AUG
                   AND d.cod_tipo_pacchetto = 'B'
              THEN
-                NVL (
-                   d.cod_uo_pratica,
-                   NVL (d.cod_uo_proposta, NVL (p.cod_uo_pratica, '00000')))
+                   NVL (
+                      d.cod_uo_pratica,
+                      NVL (d.cod_uo_proposta,
+                           NVL (p.cod_uo_pratica, '00000')))
                 || '/'
                 || SUBSTR (cod_protocollo_delibera, 3, 4)
                 || '/'
@@ -227,7 +304,7 @@
           d.val_rdv_qc_progressiva,
           --131224
           d.desc_no_delibera,
-          D.COD_DOC_CLASSIFICAZIONE_MCI --T.B. APERTURA MCI 25-06-14
+          D.COD_DOC_CLASSIFICAZIONE_MCI           --T.B. APERTURA MCI 25-06-14
      FROM t_mcrei_app_delibere d,
           t_mcrei_app_pratiche p,
           t_mcre0_app_all_data f,
@@ -271,8 +348,8 @@
           AND d.cod_fase_delibera = do2.val_dominio
           AND do2.cod_dominio = 'DELIBERA'
           AND NVL (d.cod_stato_posiz, F.COD_STATO) = s.cod_microstato --28 gen: AD
-          AND ( (d.cod_fase_pacchetto NOT IN ('ANA', 'ANM')       --13Dicembre
-                 AND d.cod_fase_delibera NOT IN ('AN', 'VA')      --13Dicembre
-                                                            )
-               OR d.flg_to_copy = '9')--07Gennaio2014: condizione per visualizzare le delibere annullate con flg_to_copi='9' 
+          AND (   (    d.cod_fase_pacchetto NOT IN ('ANA', 'ANM') --13Dicembre
+                   AND d.cod_fase_delibera NOT IN ('AN', 'VA')    --13Dicembre
+                                                              )
+               OR d.flg_to_copy = '9') --07Gennaio2014: condizione per visualizzare le delibere annullate con flg_to_copi='9'
           AND d.flg_no_delibera = 0;

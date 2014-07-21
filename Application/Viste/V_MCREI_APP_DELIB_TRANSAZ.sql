@@ -1,6 +1,49 @@
-
-  CREATE OR REPLACE FORCE VIEW "MCRE_OWN"."V_MCREI_APP_DELIB_TRANSAZ" ("COD_SNDG", "COD_ABI", "COD_ABI_CARTOLARIZZATO", "DESC_ISTITUTO", "COD_NDG", "COD_PROTOCOLLO_DELIBERA", "COD_PROTOCOLLO_PACCHETTO", "COD_MACROTIPOLOGIA_DELIB", "DESC_MACROTIPOLOGIA", "COD_MICROTIPOLOGIA_DELIB", "DESC_MICROTIPOLOGIA", "DTA_DECORRENZA_STATO", "DTA_SCADENZA_STATO", "STATO_DI_RISCHIO", "UTILIZZATO_TOTALE", "VAL_ESP_LORDA", "SCSB_UTI_CASSA", "INTERESSI_DI_MORA", "VAL_RINUNCIA_PREGRESSA", "VAL_RINUNCIA_CAPITALE", "VAL_RINUNCIA_MORA", "VAL_RINUNCIA_TOTALE", "DTA_SCADENZA_TRANSAZ", "VAL_RINUNCIA_PERC", "FLG_NO_DELIBERA", "COD_FASE_DELIBERA", "COD_FASE_MICROTIPOLOGIA", "COD_FASE_PACCHETTO", "DESC_NOTE", "RETTIFICA_ESISTENTE_CASSA", "ORDINAMENTO", "COD_DOC_APPENDICE_PARERE", "COD_DOC_CLASSIFICAZIONE", "COD_DOC_DELIBERA_BANCA", "COD_DOC_DELIBERA_CAPOGRUPPO", "COD_DOC_PARERE_CONFORMITA", "FLG_RISTRUTTURATO", "COD_TIPO_GESTIONE", "DESC_NO_DELIBERA","COD_DOC_CLASSIFICAZIONE_MCI") AS 
-  SELECT DISTINCT
+/* Formatted on 21/07/2014 18:39:35 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_DELIB_TRANSAZ
+(
+   COD_SNDG,
+   COD_ABI,
+   COD_ABI_CARTOLARIZZATO,
+   DESC_ISTITUTO,
+   COD_NDG,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_MACROTIPOLOGIA_DELIB,
+   DESC_MACROTIPOLOGIA,
+   COD_MICROTIPOLOGIA_DELIB,
+   DESC_MICROTIPOLOGIA,
+   DTA_DECORRENZA_STATO,
+   DTA_SCADENZA_STATO,
+   STATO_DI_RISCHIO,
+   UTILIZZATO_TOTALE,
+   VAL_ESP_LORDA,
+   SCSB_UTI_CASSA,
+   INTERESSI_DI_MORA,
+   VAL_RINUNCIA_PREGRESSA,
+   VAL_RINUNCIA_CAPITALE,
+   VAL_RINUNCIA_MORA,
+   VAL_RINUNCIA_TOTALE,
+   DTA_SCADENZA_TRANSAZ,
+   VAL_RINUNCIA_PERC,
+   FLG_NO_DELIBERA,
+   COD_FASE_DELIBERA,
+   COD_FASE_MICROTIPOLOGIA,
+   COD_FASE_PACCHETTO,
+   DESC_NOTE,
+   RETTIFICA_ESISTENTE_CASSA,
+   ORDINAMENTO,
+   COD_DOC_APPENDICE_PARERE,
+   COD_DOC_CLASSIFICAZIONE,
+   COD_DOC_DELIBERA_BANCA,
+   COD_DOC_DELIBERA_CAPOGRUPPO,
+   COD_DOC_PARERE_CONFORMITA,
+   FLG_RISTRUTTURATO,
+   COD_TIPO_GESTIONE,
+   DESC_NO_DELIBERA,
+   COD_DOC_CLASSIFICAZIONE_MCI
+)
+AS
+   SELECT DISTINCT
           d.cod_sndg,                               ---1 giu aggiunta distinct
           d.cod_abi,
           i.cod_abi_visualizzato AS cod_abi_cartolarizzato,
@@ -35,11 +78,11 @@
           CASE
              WHEN cod_fase_delibera IN ('IN', 'CM')
              THEN
-                NVL (
-                   mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
-                      d.cod_abi,
-                      d.cod_ndg),
-                   0)
+                  NVL (
+                     mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
+                        d.cod_abi,
+                        d.cod_ndg),
+                     0)
                 --      + NVL (
                 --       mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia(d.cod_abi, d.cod_ndg,'CM'),0)
                 + NVL (
@@ -56,11 +99,11 @@
              AS val_rinuncia_totale,
           dta_scadenza_transaz,                   ---aggiunta decode 18 luglio
           DECODE (
-             ( (NVL (
-                   DECODE (d.cod_fase_delibera,
-                           'IN', d.scsb_uti_cassa,
-                           d.val_uti_cassa_scsb),
-                   0))
+             (  (NVL (
+                    DECODE (d.cod_fase_delibera,
+                            'IN', d.scsb_uti_cassa,
+                            d.val_uti_cassa_scsb),
+                    0))
               + NVL (
                    mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia (
                       d.cod_abi,
@@ -72,31 +115,31 @@
                  WHEN cod_fase_delibera IN ('IN', 'CM')
                  THEN
                     TRUNC (
-                       ( ( (NVL (
-                               mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
-                                  d.cod_abi,
-                                  d.cod_ndg),
-                               0)
-                            --        + NVL (
-                            --         mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia(d.cod_abi, d.cod_ndg,'CM'),0)
-                            + NVL (
-                                 mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia (
-                                    d.cod_abi,
-                                    d.cod_ndg,
-                                    'CO'),
-                                 0)
-                            + NVL (val_rinuncia_capitale, 0)
-                            + NVL (val_rinuncia_mora, 0))
-                          / ( (NVL (
-                                  DECODE (d.cod_fase_delibera,
-                                          'IN', d.scsb_uti_cassa,
-                                          d.val_uti_cassa_scsb),
-                                  0))
-                             + NVL (
-                                  mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
-                                     d.cod_abi,
-                                     d.cod_ndg),
-                                  0))))
+                         ( (  (  NVL (
+                                    mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
+                                       d.cod_abi,
+                                       d.cod_ndg),
+                                    0)
+                               --        + NVL (
+                               --         mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia(d.cod_abi, d.cod_ndg,'CM'),0)
+                               + NVL (
+                                    mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_last_rinuncia (
+                                       d.cod_abi,
+                                       d.cod_ndg,
+                                       'CO'),
+                                    0)
+                               + NVL (val_rinuncia_capitale, 0)
+                               + NVL (val_rinuncia_mora, 0))
+                            / (  (NVL (
+                                     DECODE (d.cod_fase_delibera,
+                                             'IN', d.scsb_uti_cassa,
+                                             d.val_uti_cassa_scsb),
+                                     0))
+                               + NVL (
+                                    mcre_own.pkg_mcrei_gest_delibere.fnc_mcrei_get_stralci_ct (
+                                       d.cod_abi,
+                                       d.cod_ndg),
+                                    0))))
                        * 100)
                  ELSE
                     TO_NUMBER (d.val_perc_perd_rm)
@@ -121,12 +164,12 @@
           d.cod_doc_parere_conformita,
           d.flg_ristrutturato,
           p.cod_tipo_gestione,
-          d.desc_no_delibera, --20131230
-          D.COD_DOC_CLASSIFICAZIONE_MCI --T.B. APERTURA MCI 25-06-14
+          d.desc_no_delibera,                                       --20131230
+          D.COD_DOC_CLASSIFICAZIONE_MCI           --T.B. APERTURA MCI 25-06-14
      FROM t_mcre0_app_all_data a,
           (SELECT d.*, r.scsb_uti_tot, scsb_uti_cassa
              FROM t_mcrei_app_delibere d, t_mcrei_app_pcr_rapp_aggr r
-            WHERE d.cod_abi = r.cod_abi_cartolarizzato(+)
+            WHERE     d.cod_abi = r.cod_abi_cartolarizzato(+)
                   AND d.cod_ndg = r.cod_ndg(+))       ---aggiunto outer su ndg
                                                d,
           t_mcrei_cl_tipologie t,
@@ -151,6 +194,6 @@
           AND d.cod_abi = i.cod_abi
           AND d.cod_abi = rate.cod_abi_cartolarizzato(+)
           AND d.cod_ndg = rate.cod_ndg(+)
-          AND (t.cod_famiglia_tipologia(+) IN ('DTR', 'DRV')       --17 APRILE
+          AND (   t.cod_famiglia_tipologia(+) IN ('DTR', 'DRV')    --17 APRILE
                OR t.cod_microtipologia(+) = 'IR')                     --130423
           AND t.flg_attivo(+) = 1;

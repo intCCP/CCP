@@ -1,0 +1,99 @@
+/* Formatted on 21/07/2014 18:34:17 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_PCR_RISCHIO
+(
+   COD_ABI_ISTITUTO,
+   COD_NDG,
+   COD_SNDG,
+   COD_GRUPPO_ECONOMICO,
+   COD_GRUPPO_LEGAME,
+   DESC_ISTITUTO,
+   SCSB_ACC_TOT,
+   SCSB_UTI_TOT,
+   SCSB_TOT_GAR,
+   SCSB_DTA_RIFERIMENTO,
+   GSB_ACC_TOT,
+   GSB_UTI_TOT,
+   GSB_TOT_GAR,
+   GSB_DTA_RIFERIMENTO,
+   GGB_ACC_TOT,
+   GGB_UTI_TOT,
+   GGB_TOT_GAR,
+   GB_DTA_RIFERIMENTO,
+   GB_DTA_RIFERIMENTO_CR,
+   SCGB_ACC_SIS,
+   SCGB_UTI_SIS,
+   SCGB_GAR_SIS,
+   GEGB_ACC_SIS,
+   GEGB_UTI_SIS,
+   GEGB_GAR_SIS
+)
+AS
+   SELECT                      -- V1 VG 10/05/2011: Rifatta e Aggiunti dati CR
+                                                  -- v2 17/06/2011 VG: New PCR
+         X.COD_ABI_ISTITUTO,                       --X.COD_ABI_CARTOLARIZZATO,
+         X.COD_NDG,
+         X.COD_SNDG,
+         X.COD_GRUPPO_ECONOMICO,
+         X.COD_GRUPPO_LEGAME,
+         X.DESC_ISTITUTO,
+         P.SCSB_ACC_TOT,
+         P.SCSB_UTI_TOT,
+         P.SCSB_TOT_GAR,
+         P.SCSB_DTA_RIFERIMENTO,
+         DECODE (X.FLG_GRUPPO_ECONOMICO, 1, P.GESB_ACC_TOT, TO_NUMBER (NULL))
+            GSB_ACC_TOT,
+         DECODE (X.FLG_GRUPPO_ECONOMICO, 1, P.GESB_UTI_TOT, TO_NUMBER (NULL))
+            GSB_UTI_TOT,
+         DECODE (X.FLG_GRUPPO_ECONOMICO, 1, P.GESB_TOT_GAR, TO_NUMBER (NULL))
+            GSB_TOT_GAR,
+         DECODE (X.FLG_GRUPPO_ECONOMICO,
+                 1, P.GESB_DTA_RIFERIMENTO,
+                 TO_DATE (NULL))
+            GSB_DTA_RIFERIMENTO,
+         (CASE
+             WHEN X.FLG_GRUPPO_ECONOMICO = '1'
+             THEN
+                P.GEGB_ACC_CASSA + P.GEGB_ACC_FIRMA
+             WHEN X.FLG_GRUPPO_LEGAME = '1'
+             THEN
+                P.GLGB_ACC_CASSA + P.GLGB_ACC_FIRMA
+             ELSE
+                TO_NUMBER (NULL)
+          END)
+            GGB_ACC_TOT,
+         (CASE
+             WHEN X.FLG_GRUPPO_ECONOMICO = '1'
+             THEN
+                P.GEGB_UTI_CASSA + P.GEGB_UTI_FIRMA
+             WHEN X.FLG_GRUPPO_LEGAME = '1'
+             THEN
+                P.GLGB_UTI_CASSA + P.GLGB_UTI_FIRMA
+             ELSE
+                TO_NUMBER (NULL)
+          END)
+            GGB_UTI_TOT,
+         (CASE
+             WHEN X.FLG_GRUPPO_ECONOMICO = '1' THEN P.GEGB_TOT_GAR
+             WHEN X.FLG_GRUPPO_LEGAME = '1' THEN P.GLGB_TOT_GAR
+             ELSE TO_NUMBER (NULL)
+          END)
+            GGB_TOT_GAR,
+         P.SCSB_DTA_RIFERIMENTO GB_DTA_RIFERIMENTO,
+         CR.SCGB_DTA_RIF_CR GB_DTA_RIFERIMENTO_CR,
+         CR.SCGB_ACC_SIS,
+         CR.SCGB_UTI_SIS,
+         CR.SCGB_GAR_SIS,
+         CR.GEGB_ACC_SIS,
+         CR.GEGB_UTI_SIS,
+         CR.GEGB_GAR_SIS
+    FROM V_MCRE0_APP_UPD_FIELDS X,          --MCRE_OWN.T_MCRE0_APP_ISTITUTI I,
+                                  T_MCRE0_APP_PCR P, T_MCRE0_APP_CR CR
+   --T_MCRE0_APP_FILE_GUIDA G
+   WHERE     X.COD_ABI_CARTOLARIZZATO = P.COD_ABI_CARTOLARIZZATO(+)
+         AND X.COD_NDG = P.COD_NDG(+)
+         AND X.COD_ABI_CARTOLARIZZATO = CR.COD_ABI_CARTOLARIZZATO(+)
+         AND X.COD_NDG = CR.COD_NDG(+)
+         --      AND X.COD_ABI_CARTOLARIZZATO = G.COD_ABI_CARTOLARIZZATO
+         --      AND X.COD_NDG = G.COD_NDG
+         --      AND X.COD_ABI_ISTITUTO = I.COD_ABI(+)
+         AND X.COD_STATO = 'PT';

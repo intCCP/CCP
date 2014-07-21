@@ -1,6 +1,61 @@
-
-  CREATE OR REPLACE FORCE VIEW "MCRE_OWN"."V_MCREI_APP_DETT_PACCH_RV" ("COD_FASE_DELIBERA", "COD_FASE_MICROTIPOLOGIA", "COD_MICROTIPOLOGIA_DELIB", "COD_FASE_PACCHETTO", "FLG_NO_DELIBERA", "COD_STATO", "DESC_STATO_DI_RISCHIO", "COD_PROTOCOLLO_DELIBERA", "COD_PROTOCOLLO_PACCHETTO", "COD_ABI", "COD_ABI_CARTO", "DESC_ISTITUTO", "COD_NDG", "DTA_DECORRENZA_STATO_RISCHIO", "DTA_SCADENZA_STATO_RISCHIO", "VAL_ACCORDATO_TOTALE", "VAL_UTILIZZATO_TOTALE", "VAL_ESP_LORDA_CASSA_BT", "VAL_DI_CUI_MORA_CASSA_BT", "VAL_RETT_ESISTENTE_CASSA_BT", "VAL_NUOVA_RETT_PROP_CASSA_BT", "VAL_RETT_TOTALE_CASSA_BT", "VAL_DI_CUI_CAPITALE_CASSA_BT", "VAL_ESP_NETTA_CASSA_BT", "VAL_ESP_LORDA_CASSA_MLT", "VAL_DI_CUI_MORA_CASSA_MLT", "VAL_RETT_ESISTENTE_CASSA_MLT", "VAL_NUOVA_RETT_PROP_CASSA_MLT", "VAL_RETT_TOTALE_CASSA_MLT", "VAL_DI_CUI_CAPITALE_CASSA_MLT", "VAL_ESP_NETTA_CASSA_MLT", "VAL_ESP_FIRMA", "VAL_RETT_ESISTENTE_FIRMA", "VAL_NUOVA_RETT_PROP_FIRMA", "VAL_RETT_TOTALE_FIRMA", "VAL_ESP_DERIVATI", "VAL_RETT_ESISTENTE_DERIVATI", "VAL_NUOVA_RETT_PROP_DERIVATI", "VAL_RETT_TOTALE_DERIVATI", "VAL_RETT_ESISTENTE_TOTALE", "VAL_NUOVA_RETT_PROP_TOTALE", "VAL_RETT_PROGRESSIVA_TOTALE", "ORDINAMENTO", "COD_DOC_DELIBERA_BANCA", "COD_DOC_PARERE_CONFORMITA", "COD_DOC_APPENDICE_PARERE", "COD_DOC_DELIBERA_CAPOGRUPPO", "COD_DOC_CLASSIFICAZIONE", "RDV_PROGR_CASSA", "RDV_PROGR_FIRMA", "DESC_NO_DELIBERA","COD_DOC_CLASSIFICAZIONE_MCI") AS 
-  SELECT DISTINCT
+/* Formatted on 21/07/2014 18:39:55 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_DETT_PACCH_RV
+(
+   COD_FASE_DELIBERA,
+   COD_FASE_MICROTIPOLOGIA,
+   COD_MICROTIPOLOGIA_DELIB,
+   COD_FASE_PACCHETTO,
+   FLG_NO_DELIBERA,
+   COD_STATO,
+   DESC_STATO_DI_RISCHIO,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_ABI,
+   COD_ABI_CARTO,
+   DESC_ISTITUTO,
+   COD_NDG,
+   DTA_DECORRENZA_STATO_RISCHIO,
+   DTA_SCADENZA_STATO_RISCHIO,
+   VAL_ACCORDATO_TOTALE,
+   VAL_UTILIZZATO_TOTALE,
+   VAL_ESP_LORDA_CASSA_BT,
+   VAL_DI_CUI_MORA_CASSA_BT,
+   VAL_RETT_ESISTENTE_CASSA_BT,
+   VAL_NUOVA_RETT_PROP_CASSA_BT,
+   VAL_RETT_TOTALE_CASSA_BT,
+   VAL_DI_CUI_CAPITALE_CASSA_BT,
+   VAL_ESP_NETTA_CASSA_BT,
+   VAL_ESP_LORDA_CASSA_MLT,
+   VAL_DI_CUI_MORA_CASSA_MLT,
+   VAL_RETT_ESISTENTE_CASSA_MLT,
+   VAL_NUOVA_RETT_PROP_CASSA_MLT,
+   VAL_RETT_TOTALE_CASSA_MLT,
+   VAL_DI_CUI_CAPITALE_CASSA_MLT,
+   VAL_ESP_NETTA_CASSA_MLT,
+   VAL_ESP_FIRMA,
+   VAL_RETT_ESISTENTE_FIRMA,
+   VAL_NUOVA_RETT_PROP_FIRMA,
+   VAL_RETT_TOTALE_FIRMA,
+   VAL_ESP_DERIVATI,
+   VAL_RETT_ESISTENTE_DERIVATI,
+   VAL_NUOVA_RETT_PROP_DERIVATI,
+   VAL_RETT_TOTALE_DERIVATI,
+   VAL_RETT_ESISTENTE_TOTALE,
+   VAL_NUOVA_RETT_PROP_TOTALE,
+   VAL_RETT_PROGRESSIVA_TOTALE,
+   ORDINAMENTO,
+   COD_DOC_DELIBERA_BANCA,
+   COD_DOC_PARERE_CONFORMITA,
+   COD_DOC_APPENDICE_PARERE,
+   COD_DOC_DELIBERA_CAPOGRUPPO,
+   COD_DOC_CLASSIFICAZIONE,
+   RDV_PROGR_CASSA,
+   RDV_PROGR_FIRMA,
+   DESC_NO_DELIBERA,
+   COD_DOC_CLASSIFICAZIONE_MCI
+)
+AS
+   SELECT DISTINCT
           cod_fase_delibera,
           cod_fase_microtipologia,
           cod_microtipologia_delib,
@@ -35,7 +90,7 @@
           --val_esp_cassa_qta_cap AS val_di_cui_capitale_cassa_bt,
           esp_lorda_cassa - NVL (val_tot_interessi_di_mora, 0)
              AS val_di_cui_capitale_cassa_bt,
-          (esp_lorda_cassa - NVL (val_tot_interessi_di_mora, 0))
+            (esp_lorda_cassa - NVL (val_tot_interessi_di_mora, 0))
           - val_rett_cassa_qta_cap
              AS val_esp_netta_cassa_bt,
           TO_NUMBER (NULL) AS val_esp_lorda_cassa_mlt,
@@ -65,7 +120,7 @@
           cod_doc_delibera_capogruppo,
           cod_doc_classificazione,
           val_rett_cassa_qta_cap AS rdv_progr_cassa,               -- 3 maggio
-          val_rett_rapp_firma AS rdv_progr_firma,                   -- 3 maggio
+          val_rett_rapp_firma AS rdv_progr_firma,                  -- 3 maggio
           desc_no_delibera,
           COD_DOC_CLASSIFICAZIONE_MCI
      FROM (SELECT DISTINCT
@@ -87,20 +142,20 @@
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS esp_lorda_cassa,
                   SUM (
-                     NVL (val_utilizzato_lordo, 0)
+                       NVL (val_utilizzato_lordo, 0)
                      - NVL (val_utilizzato_mora, 0))
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS val_esp_cassa_qta_cap,
                   SUM (
-                     NVL (val_utilizzato_firma, 0)
+                       NVL (val_utilizzato_firma, 0)
                      + NVL (val_utilizzato_lordo, 0))
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS val_esp_complessiva,
                   SUM (
-                     (NVL (val_utilizzato_lordo, 0)
-                      - NVL (val_utilizzato_mora, 0))
+                       (  NVL (val_utilizzato_lordo, 0)
+                        - NVL (val_utilizzato_mora, 0))
                      + NVL (val_utilizzato_firma, 0))
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
@@ -117,7 +172,7 @@
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS val_esp_netta_cassa_qta_cap,
-                  NVL (d2.val_rdv_extra_delibera, 0)
+                    NVL (d2.val_rdv_extra_delibera, 0)
                   + NVL (d2.val_rdv_extra_fi, 0)
                      AS val_rett_attuale,
                   SUM (
@@ -135,7 +190,7 @@
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS val_tot_interessi_di_mora,
-                  (NVL (d.val_rdv_qc_progressiva, 0)
+                  (  NVL (d.val_rdv_qc_progressiva, 0)
                    + NVL (d.val_rdv_progr_fi, 0))
                      AS val_tot_rett_calcolata,      ----RDV DI CA + RDV DI FI
                   SUM (
@@ -143,9 +198,9 @@
                   OVER (
                      PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera)
                      AS val_accordato_delib,
-                  --21 MARZO
-                  --SUM(val_rdv_tot) over(PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera) AS val_tot_rett_calcolata, ----RDV DI CA + RDV DI FI
-                  NVL (d.val_rdv_qc_ante_delib, 0)
+                    --21 MARZO
+                    --SUM(val_rdv_tot) over(PARTITION BY r.cod_abi, r.cod_ndg, r.cod_prot_delibera) AS val_tot_rett_calcolata, ----RDV DI CA + RDV DI FI
+                    NVL (d.val_rdv_qc_ante_delib, 0)
                   + NVL (d2.val_rdv_progr_fi, 0)
                      AS val_tot_rett_progr_delib,     ---TOT RDV ANTE DELIBERA
                   NULL AS val_tot_rett_progr_parere,
@@ -158,11 +213,11 @@
                   d2.val_rdv_rapp_operativi AS val_rett_rapp_op_delib, --ultima delibera PRECEDENTE
                   d.val_rdv_rapp_operativi AS val_rett_rapp_op_progr,
                   d.val_perc_rett_rapp_firma,
-                  d.val_rdv_qc_ante_delib AS val_rdv_pregr_cassa, ---IN HOST LA RDV ? SEMPRE E SOLO DI CASSA
+                  d.val_rdv_qc_ante_delib AS val_rdv_pregr_cassa, ---IN HOST LA RDV è SEMPRE E SOLO DI CASSA
                   NVL (d.val_rdv_pregr_fi, 0) AS val_rdv_pregr_firma, --3 APRILE
-                  (NVL (d.val_rdv_qc_progressiva, 0)
-                   + NVL (d.val_rdv_progr_fi, 0))
-                  - (NVL (d.val_rdv_qc_ante_delib, 0)
+                    (  NVL (d.val_rdv_qc_progressiva, 0)
+                     + NVL (d.val_rdv_progr_fi, 0))
+                  - (  NVL (d.val_rdv_qc_ante_delib, 0)
                      + NVL (d2.val_rdv_progr_fi, 0))
                      AS val_variazione_rdv,
                   NULL AS val_rdv_cassa_mese_prec,
@@ -176,8 +231,8 @@
                   d.cod_doc_delibera_capogruppo,
                   d.flg_no_delibera,
                   d.cod_doc_classificazione,
-                  d.desc_no_delibera, -- 20131230
-                  D.COD_DOC_CLASSIFICAZIONE_MCI --T.B. APERTURA MCI 25-06-14
+                  d.desc_no_delibera,                              -- 20131230
+                  D.COD_DOC_CLASSIFICAZIONE_MCI   --T.B. APERTURA MCI 25-06-14
              FROM                     --v_mcrei_app_dett_rapporti_rv 18 aprile
                  (SELECT DISTINCT
                          dett.cod_abi,
@@ -236,7 +291,7 @@
                                                pcr.val_imp_utilizzato /*+ NVL (i.val_imp_mora, 0)*/
                                                                      ),
                                     0)
-                                    AS val_utilizzato_lordo, ---in pcr l'utilizzato ? gi? comprensivo di mora
+                                    AS val_utilizzato_lordo, ---in pcr l'utilizzato è già comprensivo di mora
                                  DECODE (
                                     pcr.cod_classe_ft,
                                     'FI', NVL (st.val_esposizione,
@@ -299,9 +354,9 @@
                                  st.val_imp_rettifica_pregr,
                                  st.val_rdv_tot,
                                  st.val_imp_rettifica_att,
-                                 NVL (pcr.val_imp_utilizzato, 0)
-                                 - ( ( (100 - ra.val_perc_fondo_terzi)
-                                      * NVL (pcr.val_imp_utilizzato, 0))
+                                   NVL (pcr.val_imp_utilizzato, 0)
+                                 - (  (  (100 - ra.val_perc_fondo_terzi)
+                                       * NVL (pcr.val_imp_utilizzato, 0))
                                     / 100)
                                     AS fondo_terzi,
                                  DECODE (

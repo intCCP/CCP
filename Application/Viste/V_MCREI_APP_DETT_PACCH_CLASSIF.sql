@@ -1,7 +1,45 @@
-
-  CREATE OR REPLACE FORCE VIEW "MCRE_OWN"."V_MCREI_APP_DETT_PACCH_CLASSIF" ("COD_SNDG", "COD_PROTOCOLLO_PACCHETTO", "COD_ABI", "COD_NDG", "COD_PROTOCOLLO_DELIBERA", "COD_ABI_CARTOLARIZZATO", "DESC_ISTITUTO", "COD_STATO", "DTA_DECORRENZA_STATO", "DTA_ACCENSIONE_PROP_RISCHIO", "DESC_MOTIVO_PASS_RISCHIO", "VAL_ACCORDATO", "VAL_ACCORDATO_DERIVATI", "TOTALE_UTILIZZI", "UTILIZZI_CASSA", "UTI_CASSA_CAPITALE", "UTI_CASSA_MORA", "UTILIZZI_FIRMA", "UTILIZZI_SOSTI", "VAL_RDV_QC_ANTE_DELIB", "COD_FASE_DELIBERA", "COD_FASE_MICROTIPOLOGIA", "COD_FASE_PACCHETTO", "TIPO_GESTIONE", "COD_UO_PROPONENTE", "PROPONENTE", "FLG_NO_DELIBERA", "ORDINAMENTO", "COD_DOC_DELIBERA_BANCA", "COD_DOC_PARERE_CONFORMITA", "COD_DOC_APPENDICE_PARERE", "COD_DOC_DELIBERA_CAPOGRUPPO", "COD_DOC_CLASSIFICAZIONE", "DESC_NO_DELIBERA","COD_DOC_CLASSIFICAZIONE_MCI") AS 
-  SELECT --0221 introdotta nuova pcr_rapp_aggr                                                                                                                                                                                                                     -- 0216 aghgiunto filtro fase_delib != 'AN'
-          d.cod_sndg,
+/* Formatted on 21/07/2014 18:39:54 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCREI_APP_DETT_PACCH_CLASSIF
+(
+   COD_SNDG,
+   COD_PROTOCOLLO_PACCHETTO,
+   COD_ABI,
+   COD_NDG,
+   COD_PROTOCOLLO_DELIBERA,
+   COD_ABI_CARTOLARIZZATO,
+   DESC_ISTITUTO,
+   COD_STATO,
+   DTA_DECORRENZA_STATO,
+   DTA_ACCENSIONE_PROP_RISCHIO,
+   DESC_MOTIVO_PASS_RISCHIO,
+   VAL_ACCORDATO,
+   VAL_ACCORDATO_DERIVATI,
+   TOTALE_UTILIZZI,
+   UTILIZZI_CASSA,
+   UTI_CASSA_CAPITALE,
+   UTI_CASSA_MORA,
+   UTILIZZI_FIRMA,
+   UTILIZZI_SOSTI,
+   VAL_RDV_QC_ANTE_DELIB,
+   COD_FASE_DELIBERA,
+   COD_FASE_MICROTIPOLOGIA,
+   COD_FASE_PACCHETTO,
+   TIPO_GESTIONE,
+   COD_UO_PROPONENTE,
+   PROPONENTE,
+   FLG_NO_DELIBERA,
+   ORDINAMENTO,
+   COD_DOC_DELIBERA_BANCA,
+   COD_DOC_PARERE_CONFORMITA,
+   COD_DOC_APPENDICE_PARERE,
+   COD_DOC_DELIBERA_CAPOGRUPPO,
+   COD_DOC_CLASSIFICAZIONE,
+   DESC_NO_DELIBERA,
+   COD_DOC_CLASSIFICAZIONE_MCI
+)
+AS
+   SELECT --0221 introdotta nuova pcr_rapp_aggr                                                                                                                                                                                                                     -- 0216 aghgiunto filtro fase_delib != 'AN'
+         d.cod_sndg,
           d.cod_protocollo_pacchetto,
           d.cod_abi,
           d.cod_ndg,
@@ -12,7 +50,7 @@
           f.dta_decorrenza_stato,
           d.dta_motivo_pass_rischio AS dta_accensione_prop_rischio,
           d.desc_motivo_pass_rischio,
-          /*se lo stato della delibera ? inserito, si recuperano i dati contabili direttamente da pcr*/
+          /*se lo stato della delibera è inserito, si recuperano i dati contabili direttamente da pcr*/
           NVL (
              DECODE (cod_fase_delibera,
                      'IN', p.scsb_acc_tot,
@@ -73,17 +111,26 @@
                  'ANALITICO'
            END)
              AS tipo_gestione,
-          case 
-              when nvl(nvl(nullif(f.cod_comparto_assegnato,'#'), nullif(f.cod_comparto_calcolato,'#')),nullif(f.cod_struttura_competente,'#')) is not null 
-                then nvl(nvl(nullif(f.cod_comparto_assegnato,'#'), nullif(f.cod_comparto_calcolato,'#')),nullif(f.cod_struttura_competente,'#'))  
-              else
-              (
-              select o.cod_struttura_competente
-                from t_mcre0_App_Struttura_org o
-                where o.cod_abi_istituto = f.cod_abi_cartolarizzato
-                  and O.COD_COMPARTO= nvl(f.cod_comparto_assegnato, f.cod_comparto_calcolato)
-          )
-          end cod_uo_proponente,
+          CASE
+             WHEN NVL (
+                     NVL (NULLIF (f.cod_comparto_assegnato, '#'),
+                          NULLIF (f.cod_comparto_calcolato, '#')),
+                     NULLIF (f.cod_struttura_competente, '#'))
+                     IS NOT NULL
+             THEN
+                NVL (
+                   NVL (NULLIF (f.cod_comparto_assegnato, '#'),
+                        NULLIF (f.cod_comparto_calcolato, '#')),
+                   NULLIF (f.cod_struttura_competente, '#'))
+             ELSE
+                (SELECT o.cod_struttura_competente
+                   FROM t_mcre0_App_Struttura_org o
+                  WHERE     o.cod_abi_istituto = f.cod_abi_cartolarizzato
+                        AND O.COD_COMPARTO =
+                               NVL (f.cod_comparto_assegnato,
+                                    f.cod_comparto_calcolato))
+          END
+             cod_uo_proponente,
           d.cod_matricola_inserente AS proponente,
           DECODE (d.flg_no_delibera,  1, 'Y',  0, 'N',  2, 'U')
              AS flg_no_delibera,
@@ -94,8 +141,8 @@
           cod_doc_appendice_parere,
           cod_doc_delibera_capogruppo,
           cod_doc_classificazione,
-          D.DESC_NO_DELIBERA, -- 20131230
-          D.COD_DOC_CLASSIFICAZIONE_MCI --T.B. APERTURA MCI 25-06-14
+          D.DESC_NO_DELIBERA,                                      -- 20131230
+          D.COD_DOC_CLASSIFICAZIONE_MCI           --T.B. APERTURA MCI 25-06-14
      FROM t_mcrei_app_delibere d,
           t_mcre0_app_all_data f,
           --t_mcre0_app_pcr p,

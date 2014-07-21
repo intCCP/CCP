@@ -1,3 +1,4 @@
+/* Formatted on 21/07/2014 18:36:11 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_SCHEDA_CLIENTE_HST
 (
    DTA_FINE_VALIDITA,
@@ -95,9 +96,7 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_SCHEDA_CLIENTE_HST
    SC_DTA_PD_MONITORAGGIO,
    SC_SCSB_QIS_ACC,
    SC_SCSB_QIS_UTI,
-   VAL_RWA,
-   FLG_LIV_CRIT,
-   DESC_NOTE_LIV_CRIT
+   VAL_RWA
 )
 AS
    SELECT E.DTA_FINE_VALIDITA,
@@ -237,41 +236,7 @@ AS
           TO_NUMBER (NULLIF (E.SCSB_QIS_ACC, 'N.D.')) SCSB_QIS_ACC,
           TO_NUMBER (NULLIF (E.SCSB_QIS_UTI, 'N.D.')) SCSB_QIS_UTI,
           --19.03 segnaposto rwa.. da storicizzare..
-          TO_NUMBER (NULL) val_rwa,		  
-		  CASE
-				WHEN E.COD_STATO in ('GF','PB','VS')
-                THEN
-					(  SELECT lcp.FL_SEMAFORO
-					   FROM T_MCRE0_DWH_LIV_CRIT_PERCORSI lcp
-					   WHERE lcp.COD_ABI = E.cod_abi_cartolarizzato 
-						 AND lcp.COD_NDG = E.cod_ndg
-                         and LCP.COD_PERCORSO = E.COD_PERCORSO
-						 and LCP.COD_PROCESSO = E.COD_PROCESSO
-						 and LCP.COD_STATO = E.COD_STATO
-						 and LCP.COD_STATO_PRE = E.COD_STATO_PRECEDENTE
-						 and LCP.DTA_SCADENZA = E.DTA_SCADENZA_STATO
-						 and rownum = 1	)
-				ELSE
-					NULL
-			END
-            FLG_LIV_CRIT,
-		  CASE
-				WHEN E.COD_STATO in ('GF','PB','VS')
-                THEN
-					(  SELECT lcp.note
-					   FROM T_MCRE0_DWH_LIV_CRIT_PERCORSI lcp
-					   WHERE lcp.COD_ABI = E.cod_abi_cartolarizzato 
-						 AND lcp.COD_NDG = E.cod_ndg
-                         and LCP.COD_PERCORSO = E.COD_PERCORSO
-						 and LCP.COD_PROCESSO = E.COD_PROCESSO
-						 and LCP.COD_STATO = E.COD_STATO
-						 and LCP.COD_STATO_PRE = E.COD_STATO_PRECEDENTE
-						 and LCP.DTA_SCADENZA = E.DTA_SCADENZA_STATO
-					     and rownum = 1)
-				ELSE
-					NULL
-			END	   
-            AS DESC_NOTE_LIV_CRIT		  
+          TO_NUMBER (NULL) val_rwa
      FROM T_MCRE0_APP_STORICO_EVENTI E,
           T_MCRE0_APP_GRUPPO_LEGAME LE,
           T_MCRE0_APP_UTENTI U,
