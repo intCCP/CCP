@@ -1,0 +1,38 @@
+/* Formatted on 21/07/2014 18:42:43 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_RAPPORTI_PTF_DETT
+(
+   COD_ABI,
+   COD_NDG,
+   COD_RAPPORTO,
+   DESC_NATURA_FTECNICA,
+   COD_FILIALE,
+   DESC_SOCIETA,
+   FLG_RAPP_CARTOLARIZZATO,
+   FLG_RAPP_FONDO_TERZO,
+   FLG_RAPP_ESTERO,
+   VAL_IMP_GBV,
+   VAL_IMP_NBV
+)
+AS
+   WITH cp
+        AS (  SELECT c.COD_ABI,
+                     COD_NDG,
+                     MAX (COD_FILIALE_AREA) COD_FILIALE_AREA
+                FROM T_MCRES_APP_SISBA_CP c, V_MCRES_ULTIMA_ACQ_FILE F
+               WHERE C.ID_DPER = F.ID_DPER AND C.COD_ABI = F.COD_ABI
+            GROUP BY c.COD_ABI, COD_NDG)
+   SELECT R.COD_ABI,
+          r.cod_ndg,
+          r.COD_RAPPORTO,
+          R.DESC_FORMA_TECNICA DESC_NATURA_FTECNICA,
+          C.COD_FILIALE_AREA COD_FILIALE,
+          R.VAL_SOCIETA_CARTOLARIZZAZIONE DESC_SOCIETA,
+          R.FLG_RAPP_CARTOLARIZZATO,
+          R.FLG_RAPP_FONDO_TERZO,
+          r.flg_rapp_estero,
+          -1 * val_imp_gbv val_imp_gbv,
+          -1 * VAL_IMP_NBV VAL_IMP_NBV
+     FROM T_MCRES_APP_RAPPORTI R, CP C
+    WHERE     r.cod_abi = c.cod_abi(+)
+          AND R.COD_NDG = C.COD_NDG(+)
+          AND r.dta_chiusura_rapp > SYSDATE;

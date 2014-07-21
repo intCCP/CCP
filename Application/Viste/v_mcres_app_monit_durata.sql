@@ -1,0 +1,22 @@
+/* Formatted on 21/07/2014 18:42:25 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_MONIT_DURATA
+(
+   COD_ABI,
+   VAL_ANNOMESE,
+   VAL_GBV,
+   VAL_NBV,
+   VAL_IND_COP,
+   COD_DURATA,
+   COD_GARANTITO,
+   DTA_INS
+)
+AS
+   SELECT "COD_ABI",
+          "VAL_ANNOMESE",
+          "VAL_GBV",
+          "VAL_NBV",
+          "VAL_IND_COP",
+          "COD_DURATA",
+          "COD_GARANTITO",
+          "DTA_INS"
+     FROM T_MCRES_FEN_MONIT_DURATA;

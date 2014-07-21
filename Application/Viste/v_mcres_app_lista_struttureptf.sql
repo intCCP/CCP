@@ -1,0 +1,18 @@
+/* Formatted on 21/07/2014 18:42:19 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_LISTA_STRUTTUREPTF
+(
+   COD_PRESIDIO,
+   COD_LIVELLO,
+   VAL_TIPO_GESTIONE,
+   DESC_PRESIDIO,
+   COD_TIPO
+)
+AS
+   SELECT DISTINCT
+          DECODE (i.COD_TIPO, 'P', i.COD_PRESIDIO, 'A') COD_PRESIDIO,
+          DECODE (i.COD_TIPO, 'P', i.COD_LIVELLO, 'A') cod_livello,
+          DECODE (i.COD_TIPO, 'P', i.VAL_TIPO_GESTIONE, 'A')
+             VAL_TIPO_GESTIONE,
+          DECODE (i.COD_TIPO, 'P', i.DESC_PRESIDIO, 'Altro') DESC_PRESIDIO,
+          NVL (cod_tipo, 'A') cod_tipo
+     FROM V_MCRES_APP_LISTA_strutture i;

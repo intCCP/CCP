@@ -1,0 +1,22 @@
+/* Formatted on 21/07/2014 18:42:42 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_RACCOLTA_DOC
+(
+   COD_ABI,
+   COD_NDG,
+   COD_UO_RAPPORTO,
+   COD_STATO_RACCOLTA_DOC,
+   DTA_INS,
+   DTA_UPD,
+   COD_MATR_PRATICA,
+   FLG_URGENTE
+)
+AS
+   SELECT "COD_ABI",
+          "COD_NDG",
+          "COD_UO_RAPPORTO",
+          "COD_STATO_RACCOLTA_DOC",
+          "DTA_INS",
+          "DTA_UPD",
+          "COD_MATR_PRATICA",
+          "FLG_URGENTE"
+     FROM t_mcres_app_raccolta_doc;

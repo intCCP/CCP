@@ -1,0 +1,27 @@
+/* Formatted on 21/07/2014 18:42:18 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_LISTA_PRESIDI
+(
+   COD_PRESIDIO,
+   DESC_PRESIDIO,
+   COD_STR_ORG_SUP,
+   COD_LIVELLO,
+   VAL_TIPO_GESTIONE,
+   COD_TIPO
+)
+AS
+   SELECT COD_STRUTTURA_COMPETENTE cod_presidio,
+          DESC_STRUTTURA_COMPETENTE DESC_PRESIDIO,
+          COD_STR_ORG_SUP,
+          COD_LIVELLO,
+          CASE
+             WHEN COD_LIVELLO IN ('PL', 'RC') THEN 'I'
+             WHEN COD_LIVELLO IN ('IP', 'IC') THEN 'E'
+             ELSE NULL
+          END
+             VAL_TIPO_GESTIONE,
+          CASE WHEN COD_LIVELLO IN ('PL', 'IP') THEN 'P' ELSE NULL END
+             cod_tipo
+     FROM T_MCRE0_APP_STRUTTURA_ORG
+    WHERE     COD_LIVELLO IN ('PL', 'RC', 'IP', 'IC')
+          AND cod_abi_istituto = '01025'
+          AND NVL (dta_chiusura, TRUNC (SYSDATE) + 1) >= TRUNC (SYSDATE);

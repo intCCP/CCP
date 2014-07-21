@@ -1,0 +1,35 @@
+/* Formatted on 21/07/2014 18:42:21 (QP5 v5.227.12220.39754) */
+CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRES_APP_MAIN_SOFF
+(
+   COD_ABI,
+   DESC_ISTITUTO,
+   COD_NDG,
+   COD_SNDG,
+   DESC_NOME_CONTROPARTE,
+   VAL_ANNOMESE,
+   DTA_DECORRENZA_STATO,
+   DTA_CHIUSURA,
+   FLG_TIPO,
+   VAL_GBV,
+   VAL_NBV,
+   VAL_GBV_INCASSI,
+   VAL_NBV_INCASSI
+)
+AS
+   SELECT R."COD_ABI",
+          I.DESC_ISTITUTO,
+          "COD_NDG",
+          r.COD_SNDG,
+          a.DESC_NOME_CONTROPARTE,
+          R.VAL_ANNOMESE,
+          R.DTA_DECORRENZA_STATO,
+          "DTA_CHIUSURA",
+          "FLG_TIPO",
+          "VAL_GBV",
+          "VAL_NBV",
+          "VAL_GBV_INCASSI",
+          "VAL_NBV_INCASSI"
+     FROM T_MCRES_FEN_MAIN_SOFF R,
+          t_mcres_app_istituti i,
+          T_MCRE0_APP_ANAGRAFICA_GRUPPO a
+    WHERE R.COD_ABI = I.COD_ABI_ISTITUTO AND R.COD_SNDG = a.COD_SNDG(+);
