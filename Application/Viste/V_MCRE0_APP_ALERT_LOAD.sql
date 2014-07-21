@@ -872,49 +872,50 @@ AS
                      WHEN m.alert_18 = 1
                      THEN
                         (SELECT CASE --130818 MM distinguo rio direzione,altri
-                                   WHEN (    c.val_livello = 'DIREZIONE'
-                                         AND x.cod_macrostato = 'RIO')
-                                   THEN
-                                      CASE
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
-                                                    p.dta_esito + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) >= 15)
-                                         THEN
-                                            'V'
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) BETWEEN 7
-                                                                     AND 14)
-                                         THEN
-                                            'A'
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) < 7)
-                                         THEN
-                                            'R'
-                                      END
+                                   --140721 MM rimuovo condizioni RIO
+                                   --                                   WHEN (    c.val_livello = 'DIREZIONE'
+                                   --                                         AND x.cod_macrostato = 'RIO')
+                                   --                                   THEN
+                                   --                                      CASE
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
+                                   --                                                    p.dta_esito + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) >= 15)
+                                   --                                         THEN
+                                   --                                            'V'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) BETWEEN 7
+                                   --                                                                     AND 14)
+                                   --                                         THEN
+                                   --                                            'A'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) < 7)
+                                   --                                         THEN
+                                   --                                            'R'
+                                   --                                      END
                                    WHEN (   (    c.val_livello IN
                                                     ('DIVISIONE',
                                                      'REGIONE',
                                                      'AREA')
-                                             AND x.cod_stato IN
-                                                    ('OC', 'IN', 'RS'))
+                                             AND x.cod_stato IN --140721 MM rimuovo condizioni RIO
+                                                    ('O C', 'IN', 'RS'))
                                          OR (    c.val_livello = 'DIREZIONE'
                                              AND x.cod_stato IN ('IN', 'RS')))
                                    THEN
@@ -958,43 +959,44 @@ AS
                      WHEN m.alert_19 = 1
                      THEN
                         (SELECT CASE --130818 MM distinguo rio direzione,altri
-                                   WHEN (    c.val_livello = 'DIREZIONE'
-                                         AND x.cod_macrostato = 'RIO')
-                                   THEN
-                                      CASE
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
-                                                    p.dta_esito + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) >= 15)
-                                         THEN
-                                            'V'
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) BETWEEN 7
-                                                                     AND 14)
-                                         THEN
-                                            'A'
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) < 7)
-                                         THEN
-                                            'R'
-                                      END
+                                   --140721 MM rimuovo condizioni RIO
+                                   --                                   WHEN (    c.val_livello = 'DIREZIONE'
+                                   --                                         AND x.cod_macrostato = 'RIO')
+                                   --                                   THEN
+                                   --                                      CASE
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
+                                   --                                                    p.dta_esito + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) >= 15)
+                                   --                                         THEN
+                                   --                                            'V'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) BETWEEN 7
+                                   --                                                                     AND 14)
+                                   --                                         THEN
+                                   --                                            'A'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) < 7)
+                                   --                                         THEN
+                                   --                                            'R'
+                                   --                                      END
                                    WHEN (   (    c.val_livello IN
                                                     ('DIVISIONE',
                                                      'REGIONE',
                                                      'AREA')
-                                             AND x.cod_stato IN
-                                                    ('OC', 'IN', 'RS'))
+                                             AND x.cod_stato IN --140721 MM rimuovo condizioni RIO
+                                                    ('O C', 'IN', 'RS'))
                                          OR (    c.val_livello = 'DIREZIONE'
                                              AND x.cod_stato IN ('IN', 'RS')))
                                    THEN
@@ -1083,7 +1085,8 @@ AS
                                        t_mcre0_app_comparti.cod_comparto
                                 AND x.cod_abi_cartolarizzato =
                                        m.cod_abi_cartolarizzato
-                                AND x.cod_ndg = m.cod_ndg)
+                                AND x.cod_ndg = m.cod_ndg
+                                AND x.cod_macrostato != 'RIO') --140721 MM rimuovo condizioni RIO
                      ELSE
                         NULL
                   END
@@ -1258,7 +1261,7 @@ AS
                                                  'AREA')
                                          --modifica per regioni e aree
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) >= 15)
                                    THEN
@@ -1268,7 +1271,7 @@ AS
                                                  'REGIONE',
                                                  'AREA')
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) BETWEEN 7
                                                                      AND 14)
@@ -1279,7 +1282,7 @@ AS
                                                  'REGIONE',
                                                  'AREA')
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) < 7)
                                    THEN
@@ -2387,8 +2390,3 @@ AS
             WHERE     m.cod_abi_cartolarizzato =
                          tmp.cod_abi_cartolarizzato(+)
                   AND m.cod_ndg = tmp.cod_ndg(+)) h;
-
-
-GRANT SELECT ON V_MCRE0_APP_ALERT_LOAD TO MCRE_APP;
-
-GRANT SELECT ON V_MCRE0_APP_ALERT_LOAD TO MCRE_USR;
