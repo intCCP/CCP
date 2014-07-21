@@ -1,4 +1,3 @@
-/* Formatted on 17/06/2014 18:00:15 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
 (
    COD_ABI_CARTOLARIZZATO,
@@ -32,6 +31,7 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
    ALERT_25,
    ALERT_40,
    ALERT_41,
+   ALERT_49,
    ALERT_1_OLD,
    ALERT_2_OLD,
    ALERT_3_OLD,
@@ -56,6 +56,7 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
    ALERT_25_OLD,
    ALERT_40_OLD,
    ALERT_41_OLD,
+   ALERT_49_OLD,
    DTA_INS_1,
    DTA_INS_2,
    DTA_INS_3,
@@ -80,6 +81,7 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
    DTA_INS_25,
    DTA_INS_40,
    DTA_INS_41,
+   DTA_INS_49,
    DTA_UPD_1,
    DTA_UPD_2,
    DTA_UPD_3,
@@ -104,6 +106,7 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
    DTA_UPD_25,
    DTA_UPD_40,
    DTA_UPD_41,
+   DTA_UPD_49,
    FLG_WORSE_UPD_1,
    FLG_WORSE_UPD_2,
    FLG_WORSE_UPD_3,
@@ -127,11 +130,13 @@ CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_LOAD
    FLG_WORSE_UPD_23,
    FLG_WORSE_UPD_25,
    FLG_WORSE_UPD_40,
-   FLG_WORSE_UPD_41
+   FLG_WORSE_UPD_41,
+   FLG_WORSE_UPD_49
 )
 AS
    SELECT               --1022mm: FIX A CR calcolo alert 19/40 per rio Regione
           --1024mm: FIX A CR calcolo alert 40
+          -- VG 20140626 alert 49
           h."COD_ABI_CARTOLARIZZATO",
           h."COD_ABI_ISTITUTO",
           h."COD_NDG",
@@ -165,6 +170,7 @@ AS
           h."ALERT_40",
           h."ALERT_41",
           --   h."ALERT_45",
+          h."ALERT_49",
           h.alert_1_old,
           h.alert_2_old,
           h.alert_3_old,
@@ -191,6 +197,7 @@ AS
           h.alert_40_old,
           h.alert_41_old,
           --   h.alert_45_old,
+          h.alert_49_old,
           DECODE (h.alert_1, NULL, NULL, h.dta_ins_1) dta_ins_1,
           DECODE (h.alert_2, NULL, NULL, h.dta_ins_2) dta_ins_2,
           DECODE (h.alert_3, NULL, NULL, h.dta_ins_3) dta_ins_3,
@@ -217,6 +224,7 @@ AS
           DECODE (h.alert_40, NULL, NULL, h.dta_ins_40) dta_ins_40,
           DECODE (h.alert_41, NULL, NULL, h.dta_ins_41) dta_ins_41,
           --   DECODE (h.alert_45, NULL, NULL, h.dta_ins_45) dta_ins_45,
+          DECODE (h.alert_49, NULL, NULL, h.dta_ins_49) dta_ins_49,
           h.dta_upd_1,
           h.dta_upd_2,
           h.dta_upd_3,
@@ -243,7 +251,7 @@ AS
           h.dta_upd_40,
           h.dta_upd_41,
           --   h.dta_upd_45,
-
+          h.dta_upd_49,
           /***
                             ** Calcolo  FLG_WORSE_UPD
                                ***/
@@ -420,13 +428,20 @@ AS
                 - DECODE (alert_41,  'V', 1,  'A', 2,  'R', 3,  0)),
              -1, 1,
              0)
-             flg_worse_upd_41
-     -- DECODE (SIGN ( DECODE (alert_45_old, 'V', 1, 'A', 2, 'R', 3, 4)
-     --     - DECODE (alert_45, 'V', 1, 'A', 2, 'R', 3, 0)
-     --      ),
-     --   -1, 1,
-     --   0
-     --    ) flg_worse_upd_45
+             flg_worse_upd_41,
+          -- DECODE (SIGN ( DECODE (alert_45_old, 'V', 1, 'A', 2, 'R', 3, 4)
+          --     - DECODE (alert_45, 'V', 1, 'A', 2, 'R', 3, 0)
+          --      ),
+          --   -1, 1,
+          --   0
+          --    ) flg_worse_upd_45
+          DECODE (
+             SIGN (
+                  DECODE (alert_49_old,  'V', 1,  'A', 2,  'R', 3,  4)
+                - DECODE (alert_49,  'V', 1,  'A', 2,  'R', 3,  0)),
+             -1, 1,
+             0)
+             flg_worse_upd_49
      FROM (SELECT m.cod_abi_cartolarizzato,
                   m.cod_abi_istituto,
                   m.cod_ndg,
@@ -857,49 +872,50 @@ AS
                      WHEN m.alert_18 = 1
                      THEN
                         (SELECT CASE --130818 MM distinguo rio direzione,altri
-                                   WHEN (    c.val_livello = 'DIREZIONE'
-                                         AND x.cod_macrostato = 'RIO')
-                                   THEN
-                                      CASE
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
-                                                    p.dta_esito + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) >= 15)
-                                         THEN
-                                            'V'
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) BETWEEN 7
-                                                                     AND 14)
-                                         THEN
-                                            'A'
-                                         WHEN (  DECODE (
-                                                    DECODE (p.flg_esito,
-                                                            0, NULL,
-                                                            p.dta_esito),
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) < 7)
-                                         THEN
-                                            'R'
-                                      END
+                                   --140721 MM rimuovo condizioni RIO
+                                   --                                   WHEN (    c.val_livello = 'DIREZIONE'
+                                   --                                         AND x.cod_macrostato = 'RIO')
+                                   --                                   THEN
+                                   --                                      CASE
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
+                                   --                                                    p.dta_esito + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) >= 15)
+                                   --                                         THEN
+                                   --                                            'V'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) BETWEEN 7
+                                   --                                                                     AND 14)
+                                   --                                         THEN
+                                   --                                            'A'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    DECODE (p.flg_esito,
+                                   --                                                            0, NULL,
+                                   --                                                            p.dta_esito),
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) < 7)
+                                   --                                         THEN
+                                   --                                            'R'
+                                   --                                      END
                                    WHEN (   (    c.val_livello IN
                                                     ('DIVISIONE',
                                                      'REGIONE',
                                                      'AREA')
-                                             AND x.cod_stato IN
-                                                    ('OC', 'IN', 'RS'))
+                                             AND x.cod_stato IN --140721 MM rimuovo condizioni RIO
+                                                    ('O C', 'IN', 'RS'))
                                          OR (    c.val_livello = 'DIREZIONE'
                                              AND x.cod_stato IN ('IN', 'RS')))
                                    THEN
@@ -943,43 +959,44 @@ AS
                      WHEN m.alert_19 = 1
                      THEN
                         (SELECT CASE --130818 MM distinguo rio direzione,altri
-                                   WHEN (    c.val_livello = 'DIREZIONE'
-                                         AND x.cod_macrostato = 'RIO')
-                                   THEN
-                                      CASE
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
-                                                    p.dta_esito + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) >= 15)
-                                         THEN
-                                            'V'
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) BETWEEN 7
-                                                                     AND 14)
-                                         THEN
-                                            'A'
-                                         WHEN (  DECODE (
-                                                    p.dta_esito,
-                                                    NULL,   x.dta_servizio
-                                                          + c.val_gg_prima_proroga,
-                                                      p.dta_esito
-                                                    + c.val_gg_seconda_proroga)
-                                               - TRUNC (SYSDATE) < 7)
-                                         THEN
-                                            'R'
-                                      END
+                                   --140721 MM rimuovo condizioni RIO
+                                   --                                   WHEN (    c.val_livello = 'DIREZIONE'
+                                   --                                         AND x.cod_macrostato = 'RIO')
+                                   --                                   THEN
+                                   --                                      CASE
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL, x.dta_servizio + c.val_gg_prima_proroga,
+                                   --                                                    p.dta_esito + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) >= 15)
+                                   --                                         THEN
+                                   --                                            'V'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) BETWEEN 7
+                                   --                                                                     AND 14)
+                                   --                                         THEN
+                                   --                                            'A'
+                                   --                                         WHEN (  DECODE (
+                                   --                                                    p.dta_esito,
+                                   --                                                    NULL,   x.dta_servizio
+                                   --                                                          + c.val_gg_prima_proroga,
+                                   --                                                      p.dta_esito
+                                   --                                                    + c.val_gg_seconda_proroga)
+                                   --                                               - TRUNC (SYSDATE) < 7)
+                                   --                                         THEN
+                                   --                                            'R'
+                                   --                                      END
                                    WHEN (   (    c.val_livello IN
                                                     ('DIVISIONE',
                                                      'REGIONE',
                                                      'AREA')
-                                             AND x.cod_stato IN
-                                                    ('OC', 'IN', 'RS'))
+                                             AND x.cod_stato IN --140721 MM rimuovo condizioni RIO
+                                                    ('O C', 'IN', 'RS'))
                                          OR (    c.val_livello = 'DIREZIONE'
                                              AND x.cod_stato IN ('IN', 'RS')))
                                    THEN
@@ -1068,7 +1085,8 @@ AS
                                        t_mcre0_app_comparti.cod_comparto
                                 AND x.cod_abi_cartolarizzato =
                                        m.cod_abi_cartolarizzato
-                                AND x.cod_ndg = m.cod_ndg)
+                                AND x.cod_ndg = m.cod_ndg
+                                AND x.cod_macrostato != 'RIO') --140721 MM rimuovo condizioni RIO
                      ELSE
                         NULL
                   END
@@ -1243,7 +1261,7 @@ AS
                                                  'AREA')
                                          --modifica per regioni e aree
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) >= 15)
                                    THEN
@@ -1253,7 +1271,7 @@ AS
                                                  'REGIONE',
                                                  'AREA')
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) BETWEEN 7
                                                                      AND 14)
@@ -1264,7 +1282,7 @@ AS
                                                  'REGIONE',
                                                  'AREA')
                                          AND x.cod_stato IN
-                                                ('OC', 'IN', 'RS')
+                                                ('O C', 'IN', 'RS')
                                          AND (  x.dta_scadenza_stato
                                               - TRUNC (SYSDATE)) < 7)
                                    THEN
@@ -1317,6 +1335,99 @@ AS
                   --      END
                   --     ELSE NULL
                   --    END alert_45,
+                  ------------------ ALERT_49 ---------------------
+                  CASE
+                     WHEN m.alert_49 = 1
+                     THEN
+                        (SELECT CASE
+                                   WHEN SYSDATE - dta_scadenza BETWEEN 6
+                                                                   AND 15
+                                   THEN
+                                      'V'
+                                   WHEN SYSDATE - dta_scadenza BETWEEN 16
+                                                                   AND 25
+                                   THEN
+                                      'A'
+                                   WHEN SYSDATE - dta_scadenza > 25
+                                   THEN
+                                      'R'
+                                   WHEN   SYSDATE
+                                        - DECODE (
+                                             SIGN (
+                                                  dta_validazione
+                                                - DTA_PRESA_VISIONE),
+                                             -1, DTA_PRESA_VISIONE,
+                                             dta_validazione) BETWEEN 31
+                                                                  AND 40
+                                   THEN
+                                      'V'
+                                   WHEN   SYSDATE
+                                        - DECODE (
+                                             SIGN (
+                                                  dta_validazione
+                                                - DTA_PRESA_VISIONE),
+                                             -1, DTA_PRESA_VISIONE,
+                                             dta_validazione) BETWEEN 41
+                                                                  AND 50
+                                   THEN
+                                      'A'
+                                   WHEN   SYSDATE
+                                        - DECODE (
+                                             SIGN (
+                                                  dta_validazione
+                                                - DTA_PRESA_VISIONE),
+                                             -1, DTA_PRESA_VISIONE,
+                                             dta_validazione) > 50
+                                   THEN
+                                      'R'
+                                   ELSE
+                                      NULL
+                                END
+                           FROM (SELECT DISTINCT
+                                        COD_ABI_CARTOLARIZZATO,
+                                        COD_NDG,
+                                        CASE
+                                           WHEN   SYSDATE
+                                                - NVL (
+                                                     DECODE (
+                                                        SIGN (
+                                                             NVL (
+                                                                DTA_PIANO_VALIDATO,
+                                                                  DTA_PRESA_VISIONE_MODIFICA
+                                                                - 1)
+                                                           - NVL (
+                                                                DTA_PRESA_VISIONE_MODIFICA,
+                                                                  DTA_PIANO_VALIDATO
+                                                                - 1)),
+                                                        -1, DTA_PRESA_VISIONE_MODIFICA,
+                                                        DTA_PIANO_VALIDATO),
+                                                     SYSDATE) > 30
+                                           THEN
+                                              1
+                                           WHEN SYSDATE - DTA_scadenza > 5
+                                           THEN
+                                              1
+                                           ELSE
+                                              0
+                                        END
+                                           flg_validazione,
+                                        dta_scadenza,
+                                        DTA_PIANO_VALIDATO dta_validazione,
+                                        DTA_PRESA_VISIONE_MODIFICA
+                                           DTA_PRESA_VISIONE
+                                   FROM T_MCRE0_APP_GEST_PM
+                                  WHERE     NVL (FLG_PIANO_ANNULLATO, 'N') =
+                                               'N'
+                                        AND ID_WORKFLOW NOT IN (30, 40)) b
+                          WHERE     b.flg_validazione = 1
+                                AND m.COD_ABI_CARTOLARIZZATO =
+                                       b.COD_ABI_CARTOLARIZZATO
+                                AND m.COD_NDG = b.COD_NDG
+                                AND m.COD_STATO = 'PM')
+                     ELSE
+                        NULL
+                  END
+                     alert_49,
                   NVL (dta_ins_1, SYSDATE) dta_ins_1,
                   SYSDATE dta_upd_1,
                   tmp.alert_2 alert_2_old,
@@ -1389,9 +1500,12 @@ AS
                   SYSDATE dta_upd_40,
                   tmp.alert_41 alert_41_old,
                   NVL (dta_ins_41, SYSDATE) dta_ins_41,
-                  SYSDATE dta_upd_41
-             --    tmp.alert_45 alert_45_old,
-             --    NVL (dta_ins_45, SYSDATE) dta_ins_45, SYSDATE dta_upd_45
+                  SYSDATE dta_upd_41,
+                  --    tmp.alert_45 alert_45_old,
+                  --    NVL (dta_ins_45, SYSDATE) dta_ins_45, SYSDATE dta_upd_45
+                  tmp.alert_49 alert_49_old,
+                  NVL (dta_ins_49, SYSDATE) dta_ins_49,
+                  SYSDATE dta_upd_49
              FROM (SELECT a.cod_abi_cartolarizzato,
                           a.cod_abi_istituto,
                           a.cod_ndg,
@@ -2156,12 +2270,12 @@ AS
                                               --                                              AND (pv.DTA_PR_VIS IS NULL
                                               --                                                   OR pv.DTA_PR_VIS <
                                               --                                                         p.DTA_INS)
-                                              AND PV.ID_ALERT = 41
+                                              AND PV.ID_ALERT(+) = 41
                                               AND TRUNC (
                                                      NVL (
                                                         PV.DTA_PR_VIS,
                                                         TO_DATE ('01011000',
-                                                                 'DDMMYYYY'))) <=
+                                                                 'DDMMYYYY'))) <
                                                      TRUNC (p.DTA_INS)
                                               AND id_dper =
                                                      (SELECT idper
@@ -2173,37 +2287,89 @@ AS
                               ELSE
                                  0
                            END)
-                             alert_41
-                     -------------------- ALERT_45 ---------------------
-                     --      (CASE
-                     --        WHEN a.cod_macrostato IN
-                     --              ('RIO', 'IN', 'RS', 'SC')
-                     --        -- estensione a IN, RS e SC
-                     --        AND NOT EXISTS (
-                     --         SELECT DISTINCT 1
-                     --              FROM v_mcre0_app_rio_azioni v
-                     --             WHERE (   (  NVL
-                     --                   (a.cod_gruppo_economico,
-                     --                    -1
-                     --                   ) != -1
-                     --                AND v.cod_gruppo_economico =
-                     --                   a.cod_gruppo_economico
-                     --                 )
-                     --                OR (  NVL
-                     --                   (a.cod_gruppo_economico,
-                     --                    -1
-                     --                   ) = -1
-                     --                AND v.cod_abi_cartolarizzato =
-                     --                   a.cod_abi_cartolarizzato
-                     --                AND v.cod_ndg =
-                     --                     a.cod_ndg
-                     --                 )
-                     --               )
-                     --             AND v.cod_azione IS NOT NULL)
-                     --         THEN 1
-                     --        ELSE 0
-                     --       END
-                     --      ) alert_45
+                             alert_41,
+                          -------------------- ALERT_45 ---------------------
+                          --      (CASE
+                          --        WHEN a.cod_macrostato IN
+                          --              ('RIO', 'IN', 'RS', 'SC')
+                          --        -- estensione a IN, RS e SC
+                          --        AND NOT EXISTS (
+                          --         SELECT DISTINCT 1
+                          --              FROM v_mcre0_app_rio_azioni v
+                          --             WHERE (   (  NVL
+                          --                   (a.cod_gruppo_economico,
+                          --                    -1
+                          --                   ) != -1
+                          --                AND v.cod_gruppo_economico =
+                          --                   a.cod_gruppo_economico
+                          --                 )
+                          --                OR (  NVL
+                          --                   (a.cod_gruppo_economico,
+                          --                    -1
+                          --                   ) = -1
+                          --                AND v.cod_abi_cartolarizzato =
+                          --                   a.cod_abi_cartolarizzato
+                          --                AND v.cod_ndg =
+                          --                     a.cod_ndg
+                          --                 )
+                          --               )
+                          --             AND v.cod_azione IS NOT NULL)
+                          --         THEN 1
+                          --        ELSE 0
+                          --       END
+                          --      ) alert_45
+                          -------------------- ALERT_49 ---------------------
+                          (CASE
+                              WHEN     a.cod_macrostato IN ('PM')
+                                   AND EXISTS
+                                          (SELECT DISTINCT 1
+                                             FROM (SELECT DISTINCT
+                                                          COD_ABI_CARTOLARIZZATO,
+                                                          COD_NDG,
+                                                          CASE
+                                                             WHEN   SYSDATE
+                                                                  - NVL (
+                                                                       DECODE (
+                                                                          SIGN (
+                                                                               NVL (
+                                                                                  DTA_PIANO_VALIDATO,
+                                                                                    DTA_PRESA_VISIONE_MODIFICA
+                                                                                  - 1)
+                                                                             - NVL (
+                                                                                  DTA_PRESA_VISIONE_MODIFICA,
+                                                                                    DTA_PIANO_VALIDATO
+                                                                                  - 1)),
+                                                                          -1, DTA_PRESA_VISIONE_MODIFICA,
+                                                                          DTA_PIANO_VALIDATO),
+                                                                       SYSDATE) >
+                                                                     30
+                                                             THEN
+                                                                1
+                                                             WHEN   SYSDATE
+                                                                  - DTA_scadenza >
+                                                                     5
+                                                             THEN
+                                                                1
+                                                             ELSE
+                                                                0
+                                                          END
+                                                             flg_validazione
+                                                     FROM T_MCRE0_APP_GEST_PM
+                                                    WHERE     NVL (
+                                                                 FLG_PIANO_ANNULLATO,
+                                                                 'N') = 'N'
+                                                          AND ID_WORKFLOW NOT IN
+                                                                 (30, 40)) v
+                                            WHERE     v.cod_abi_cartolarizzato =
+                                                         a.cod_abi_cartolarizzato
+                                                  AND v.cod_ndg = a.cod_ndg
+                                                  AND v.flg_validazione = 1)
+                              THEN
+                                 1
+                              ELSE
+                                 0
+                           END)
+                             alert_49
                      FROM v_mcre0_app_upd_fields_p1 a,
                           t_mcre0_app_comparti b,
                           mv_mcre0_app_istituti c,
@@ -2224,6 +2390,3 @@ AS
             WHERE     m.cod_abi_cartolarizzato =
                          tmp.cod_abi_cartolarizzato(+)
                   AND m.cod_ndg = tmp.cod_ndg(+)) h;
-
-
-GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON MCRE_OWN.V_MCRE0_APP_ALERT_LOAD TO MCRE_USR;
