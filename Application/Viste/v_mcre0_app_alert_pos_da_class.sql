@@ -1,5 +1,4 @@
-/* Formatted on 21/07/2014 18:32:38 (QP5 v5.227.12220.39754) */
-CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_ALERT_POS_DA_CLASS
+CREATE OR REPLACE FORCE VIEW V_MCRE0_APP_ALERT_POS_DA_CLASS
 (
    VAL_ALERT,
    VAL_ORDINE_COLORE,
@@ -103,7 +102,7 @@ AS
          x.cod_stato_precedente,
          x.dta_decorrenza_stato,
          x.dta_scadenza_stato,
-         t.val_durata_stato,                                           --04/07
+         NULL val_durata_stato, --140723                                   --04/07
          --    DECODE (x.cod_macrostato,
          --      'RIO', r.cod_macrostato_destinazione,
          --      DECODE (x.cod_macrostato, 'PT', t.cod_macrostato, x.cod_macrostato_proposto))
@@ -130,9 +129,9 @@ AS
                              AND d.cod_fase_delibera NOT IN ('AN', 'VA')
                              AND d.cod_microtipologia_delib IN ('CI', 'CS'))
                END
-            WHEN x.cod_macrostato = 'PT'
+            WHEN x.cod_macrostato = 'PM'
             THEN
-               t.cod_macrostato
+               t.cod_stato_proposto
             WHEN x.cod_macrostato = 'IN'
             THEN
                'SO'                                         --solo sofferenza!
@@ -175,9 +174,9 @@ AS
                              AND d.cod_fase_delibera NOT IN ('AN', 'VA')
                              AND d.cod_microtipologia_delib IN ('CI', 'CS'))
                END
-            WHEN x.cod_macrostato = 'PT'
+            WHEN x.cod_macrostato = 'PM'
             THEN
-               t.dta_ins
+               t.dta_stato_proposto
             WHEN x.cod_macrostato = 'IN'
             THEN
                (SELECT DISTINCT
@@ -278,13 +277,19 @@ AS
          --   T_MCRE0_APP_ANAGR_GRE GE,
          --   MV_MCRE0_DENORM_STR_ORG S,
          --   T_MCRE0_APP_UTENTI U,
-         t_mcre0_app_pt_gestione_tavoli t,
+         --         t_mcre0_app_pt_gestione_tavoli t,
+         (SELECT p.*
+            FROM t_mcre0_app_gest_pm p, t_mcre0_app_gest_pm b
+           WHERE     p.cod_abi_cartolarizzato = b.cod_abi_cartolarizzato(+)
+                 AND p.cod_ndg = b.cod_ndg(+)
+                 AND p.id_piano < b.id_piano(+)
+                 AND b.id_piano IS NULL) t,
          t_mcre0_app_rio_gestione r,
          -- V_MCRE0_APP_UPD_FIELDS_ALL x
          -- todo_verificare che sia sufficiente lavorare sulla partizione attiva
          v_mcre0_app_upd_fields x
    WHERE     alert_8 IS NOT NULL
-         AND x.cod_macrostato IN ('PT', 'RIO', 'GB', 'IN', 'SC')
+         AND x.cod_macrostato IN ('PM', 'RIO', 'GB', 'IN', 'SC')
          --AND NVL (X.FLG_OUTSOURCING, 'N') = 'Y'
          AND x.flg_outsourcing = 'Y'
          -- AND I.FLG_TARGET = 'Y'
@@ -293,5 +298,6 @@ AS
          AND x.cod_ndg = a.cod_ndg
          AND x.cod_abi_cartolarizzato = t.cod_abi_cartolarizzato(+)
          AND x.cod_ndg = t.cod_ndg(+)
+         AND x.cod_percorso = t.cod_percorso(+)
          AND x.cod_abi_cartolarizzato = r.cod_abi_cartolarizzato(+)
          AND x.cod_ndg = r.cod_ndg(+);
