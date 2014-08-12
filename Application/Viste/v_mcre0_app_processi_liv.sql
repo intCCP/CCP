@@ -27,9 +27,10 @@ AS
                   p1.cod_processo cod_processo_liv,
                   p1.desc_processo desc_processo_liv,
                   p1.tip_processo cod_livello,
-                  p1.val_ordine,
+				  --meno priorità ai processi K*
+                  case when p1.cod_processo like 'K%' then p1.val_ordine +10 else p1.val_ordine end val_ordine,
                   MIN (
-                     p1.val_ordine)
+                     case when p1.cod_processo like 'K%' then p1.val_ordine +10 else p1.val_ordine end)
                   OVER (
                      PARTITION BY p.cod_abi, p.cod_processo, p1.tip_processo)
                      primo
