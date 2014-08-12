@@ -1,5 +1,4 @@
-/* Formatted on 21/07/2014 18:36:31 (QP5 v5.227.12220.39754) */
-CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_ASSEGNA_COMPARTO_GB_AV
+CREATE OR REPLACE FORCE VIEW V_MCRE0_ASSEGNA_COMPARTO_GB_AV
 (
    COD_GRUPPO_SUPER,
    COD_COMPARTO_PROPOSTO
@@ -11,7 +10,7 @@ AS
                   DTA_STATO,
                   MIN (dta_stato) OVER (PARTITION BY cod_gruppo_super)
                      min_dtata_stato
-             FROM mcre_own.t_mcre0_web_data F,
+             FROM mcre_own.t_mcre0_all_data F,--post disassegnazioni
                   (SELECT COD_ABI_CARTOLARIZZATO,
                           COD_NDG,
                           COD_COMPARTO_PROPOSTO,
