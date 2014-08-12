@@ -1,5 +1,4 @@
-/* Formatted on 21/07/2014 18:34:25 (QP5 v5.227.12220.39754) */
-CREATE OR REPLACE FORCE VIEW MCRE_OWN.V_MCRE0_APP_PM_PIANI_DA_INS
+CREATE OR REPLACE FORCE VIEW V_MCRE0_APP_PM_PIANI_DA_INS
 (
    COD_ABI_ISTITUTO,
    COD_ABI_CARTOLARIZZATO,
@@ -82,11 +81,22 @@ AS
                   AND o.cod_comparto = U.COD_COMPARTO_UTENTE
                   AND ROWNUM <= 1)
              COD_UO_ANNULLO
-     FROM V_MCRE0_APP_UPD_FIELDS a, T_MCRE0_APP_GEST_PM p
-    WHERE     a.COD_ABI_CARTOLARIZZATO = p.COD_ABI_CARTOLARIZZATO(+)
+     FROM V_MCRE0_APP_UPD_FIELDS a,
+          (SELECT a.*,
+                  ROW_NUMBER ()
+                  OVER (
+                     PARTITION BY cod_abi_cartolarizzato,
+                                  cod_ndg,
+                                  cod_percorso
+                     ORDER BY id_piano DESC)
+                     AS numb
+             FROM T_MCRE0_APP_GEST_PM a) p
+    WHERE     p.numb = 1
+          AND a.COD_ABI_CARTOLARIZZATO = p.COD_ABI_CARTOLARIZZATO(+)
           AND a.COD_NDG = p.COD_NDG(+)
           AND A.COD_PERCORSO = P.COD_PERCORSO(+)
           AND P.FLG_PIANO_ANNULLATO(+) = 'N'
-          AND NVL (P.DTA_SCADENZA, SYSDATE + 1) >= SYSDATE       --non scaduti
-          AND NVL (P.ID_WORKFLOW, 1) NOT IN (10, 20, 40) --non completati/validati/da class
+          AND (   (    NVL (P.ID_WORKFLOW, 1) IN (0, 15, 20, 30)
+                   AND NVL (P.DTA_SCADENZA, SYSDATE - 1) < SYSDATE) -- non completati ma scaduti
+               OR NVL (P.ID_WORKFLOW, 1) NOT IN (10, 15, 20, 40)) --non completati/validati/da class
           AND A.COD_STATO = 'PM';
